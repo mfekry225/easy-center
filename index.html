@@ -474,14 +474,7 @@ body{font-family:'Tajawal',sans-serif;background:var(--g1);color:var(--g8);min-h
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* ══ SALARY CARD ══ */
-.salary-card{background:white;border:1.5px solid var(--g2);border-radius:var(--r);overflow:hidden;margin-bottom:9px}
-.salary-hd{background:linear-gradient(135deg,var(--g8),var(--g9));color:white;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
-.salary-body{padding:14px 16px}
-.salary-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--g1);font-size:.83rem}
-.salary-row:last-child{border-bottom:none;font-weight:900;font-size:.92rem;padding-top:10px;margin-top:4px}
-.salary-row.plus{color:var(--ok)}
-.salary-row.minus{color:var(--err)}
-.salary-row.total{color:var(--pr)}
+
 
 /* ══ IEP ══ */
 .iep-goal{background:var(--g0);border:1.5px solid var(--g2);border-radius:9px;padding:12px 14px;margin-bottom:8px}
@@ -767,7 +760,6 @@ body{font-family:'Tajawal',sans-serif;background:var(--g1);color:var(--g8);min-h
       <button class="btn btn-g btn-sm" onclick="go('attendance')">📅 الحضور السريع</button>
       <button class="btn btn-g btn-sm" onclick="go('sessions')">🩺 الجلسات</button>
       <button class="btn btn-g btn-sm" onclick="go('hr-leaves')">🌴 الإجازات</button>
-      <button class="btn btn-g btn-sm" onclick="go('hr-salary')">💰 الرواتب</button>
       <button class="btn btn-g btn-sm" onclick="go('center')">💳 إدارة المركز</button>
       <button class="btn btn-g btn-sm" onclick="go('reports')">📊 التقارير</button>
     </div>
@@ -806,7 +798,6 @@ body{font-family:'Tajawal',sans-serif;background:var(--g1);color:var(--g8);min-h
     <div class="ph-a">
       <button class="btn btn-g btn-sm no-print" onclick="go('attendance')">📅 الحضور السريع</button>
       <button class="btn btn-g btn-sm no-print" onclick="go('hr-leaves')">🌴 الإجازات</button>
-      <button class="btn btn-g btn-sm no-print" onclick="go('hr-salary')">💰 الرواتب</button>
       <button class="btn btn-s btn-sm no-print" id="nb-volunteers" onclick="go('volunteers')">🤝 المتطوعون</button>
       <button class="btn btn-p no-print" id="btn-add-emp" onclick="openEmpForm()">➕ موظف جديد</button>
     </div>
@@ -1074,37 +1065,6 @@ body{font-family:'Tajawal',sans-serif;background:var(--g1);color:var(--g8);min-h
 </div>
 
 <!-- HR: Salaries -->
-<div class="view" id="v-hr-salary">
-  <div class="ph">
-    <div class="ph-t"><h2>💰 الرواتب والمستحقات</h2><p id="salary-month-lbl">—</p></div>
-    <div class="ph-a">
-      <button class="btn btn-g btn-sm" onclick="salaryNav(-1)">→ السابق</button>
-      <button class="btn btn-g btn-sm" onclick="salaryNav(0)">الشهر الحالي</button>
-      <button class="btn btn-g btn-sm" onclick="salaryNav(1)">← التالي</button>
-      <button class="btn btn-s no-print" onclick="genAllSalaries()">⚡ توليد رواتب الشهر</button>
-      <button class="btn btn-g no-print" onclick="go('hr')">← رجوع</button>
-    </div>
-  </div>
-  <div class="stats" style="grid-template-columns:repeat(3,1fr)">
-    <div class="sc"><div class="lb">إجمالي الرواتب</div><div class="vl" id="sal-total">—</div><div class="sb">ريال هذا الشهر</div></div>
-    <div class="sc g"><div class="lb">تم الصرف</div><div class="vl" id="sal-paid">—</div><div class="sb">موظف</div></div>
-    <div class="sc o"><div class="lb">لم يُصرف بعد</div><div class="vl" id="sal-unpaid">—</div><div class="sb">موظف</div></div>
-  </div>
-  <div id="salary-list"></div>
-</div>
-
-<!-- Salary Detail Modal -->
-<div class="mbg" id="salary-modal" style="display:none">
-  <div class="mb mb-large" style="padding:0;overflow:hidden;border-radius:16px">
-    <div class="fhd" style="padding:16px 20px;border-radius:0"><h2 id="sal-modal-title">راتب الموظف</h2></div>
-    <div style="padding:18px 20px" id="sal-modal-body"></div>
-    <div class="fa">
-      <button class="btn btn-s" onclick="markSalaryPaid()">✅ تأكيد الصرف</button>
-      <button class="btn btn-g btn-sm no-print" onclick="window.print()">🖨️ طباعة</button>
-      <button class="btn btn-g" onclick="closeModal('salary-modal')">إغلاق</button>
-    </div>
-  </div>
-</div>
 
 <!-- ═══════════════════ STUDENTS MODULE ═══════════════════ -->
 <div class="view" id="v-students">
@@ -1435,7 +1395,7 @@ body{font-family:'Tajawal',sans-serif;background:var(--g1);color:var(--g8);min-h
       <button class="btn btn-p btn-sm" onclick="calToday()">اليوم</button>
       <button class="btn btn-g btn-sm" onclick="calNav(7)">الأسبوع التالي →</button>
       <button class="btn btn-s btn-sm no-print" onclick="openAppointmentPicker()">➕ موعد جديد</button>
-
+      <button class="btn btn-g btn-sm no-print" onclick="window.print()" title="طباعة التقويم">🖨️</button>
     </div>
   </div>
   <!-- فلاتر -->
@@ -3335,7 +3295,7 @@ function canSeeReportTab(t){
 
 // ══ NAVIGATION ══
 let curView='dash';
-let attEmpMonth=new Date(),salMonth=new Date(),attKidsDate=new Date();
+let attEmpMonth=new Date(),attKidsDate=new Date();
 const ROLES={specialist:'أخصائي (عام)',specialist_speech:'أخصائي تخاطب ونطق',specialist_physio:'أخصائي علاج فيزيائي',specialist_behavior:'أخصائي تعديل سلوك',specialist_occupational:'أخصائي علاج وظيفي',reception:'استقبال',admin:'إداري',worker:'عمال',other:'أخرى',manager:'مدير',vice:'نائب المدير',technician:'فني النظام',parent:'ولي أمر',speech:'أخصائي تخاطب',physio:'معالج فيزيائي',occ:'معالج وظيفي',behavior:'أخصائي سلوك',psych:'أخصائي نفسي',driver:'سائق'};
 // دالة مساعدة — هل هذا الدور أخصائي بأي نوع؟
 const SPECIALIST_ROLES=['specialist','specialist_speech','specialist_physio','specialist_behavior','specialist_occupational','speech','physio','occ','behavior','psych'];
@@ -3361,7 +3321,7 @@ function go(v){
   // nav highlight: attendance → nb-attendance, hr-att → nb-hr, etc.
   const nbKey=v==='attendance'?'attendance':v.split('-')[0];
   const nb=document.getElementById('nb-'+nbKey);if(nb)nb.classList.add('on');
-  const map={dash:renderDash,calendar:renderCalendar,hr:renderEmp,'emp-det':()=>{},'hr-att':renderHrAtt,'hr-leaves':renderLeaves,'hr-salary':renderSalary,students:renderStudents,'stu-det':()=>{},'iep':renderIep,sessions:renderSessions,'att-kids':renderAttKids,attendance:renderAttendance,parents:renderParents,programs:renderProgs,volunteers:renderVols,partners:renderPartners,finance:()=>checkFinanceAccess(renderFinance),reports:renderReports,settings:renderSettings,notifs:renderNotifs,docs:renderDocs,center:renderCenter};
+  const map={dash:renderDash,calendar:renderCalendar,hr:renderEmp,'emp-det':()=>{},'hr-att':renderHrAtt,'hr-leaves':renderLeaves,students:renderStudents,'stu-det':()=>{},'iep':renderIep,sessions:renderSessions,'att-kids':renderAttKids,attendance:renderAttendance,parents:renderParents,programs:renderProgs,volunteers:renderVols,partners:renderPartners,finance:()=>checkFinanceAccess(renderFinance),reports:renderReports,settings:renderSettings,notifs:renderNotifs,docs:renderDocs,center:renderCenter};
   (map[v]||function(){})();
   updateCounts();
 }
@@ -3588,37 +3548,6 @@ async function approveLeave(id,status){const l=LEAVES.find(x=>x.id===id);if(!l)r
 
 // ── Salaries ──
 let curSalEmp=null;
-function renderSalary(){
-  const months=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
-  const lbl=document.getElementById('salary-month-lbl');if(lbl)lbl.textContent=months[salMonth.getMonth()]+' '+salMonth.getFullYear();
-  const mKey=`${salMonth.getFullYear()}-${pad(salMonth.getMonth()+1)}`;
-  const mySals=SALARIES.filter(s=>s.month===mKey);
-  const tot=mySals.reduce((s,x)=>s+(x.net||0),0);
-  document.getElementById('sal-total').textContent=tot.toLocaleString()+' ر';
-  document.getElementById('sal-paid').textContent=mySals.filter(s=>s.paid).length;
-  document.getElementById('sal-unpaid').textContent=mySals.filter(s=>!s.paid).length;
-  const w=document.getElementById('salary-list');if(!w)return;
-  w.innerHTML=EMPS.map(e=>{
-    const sal=mySals.find(s=>s.empId===e.id);
-    const base=(e.salary||0)+(e.housing||0)+(e.transport||0);
-    const abs=ATT_EMP.filter(a=>a.empId===e.id&&a.date.startsWith(mKey)&&a.status==='absent').length;
-    const ded=Math.round(abs*(e.salary||0)/30);
-    const net=sal?.net??(base-ded);
-    const paid=sal?.paid||false;
-    return`<div class="salary-card"><div class="salary-hd"><div style="display:flex;align-items:center;gap:10px"><div class="av blue" style="width:38px;height:38px;border-radius:8px;font-size:.82rem">${(e.name||'?').slice(0,2)}</div><div><div style="font-weight:800">${e.name}</div><div style="font-size:.72rem;opacity:.7">${roleLabel(e.role)}</div></div></div><div style="text-align:left"><div style="font-size:1.1rem;font-weight:900">${net.toLocaleString()} ريال</div><span class="bdg ${paid?'b-gr':'b-yw'}" style="display:inline-flex;margin-top:4px">${paid?'✅ مُصرف':'⏳ لم يُصرف'}</span></div></div><div class="salary-body" style="display:grid;grid-template-columns:1fr 1fr;gap:4px"><div class="salary-row"><span>الأساسي</span><span>${(e.salary||0).toLocaleString()} ر</span></div><div class="salary-row plus"><span>البدلات</span><span>+${((e.housing||0)+(e.transport||0)).toLocaleString()} ر</span></div><div class="salary-row minus"><span>الاستقطاع (${abs} غياب)</span><span>-${ded.toLocaleString()} ر</span></div><div class="salary-row total"><span>الصافي</span><b>${net.toLocaleString()} ر</b></div></div><div style="padding:10px 16px;border-top:1px solid var(--g1);display:flex;gap:8px">${!paid?`<button class="btn btn-s btn-xs" onclick="markPaid('${e.id}','${mKey}',${net})">✅ تأكيد الصرف</button>`:''}</div></div>`;}).join('')||`<div class="empty"><div class="ei">💰</div><div class="et">لا يوجد موظفون</div></div>`;
-}
-function salaryNav(d){if(d===0){salMonth=new Date();}else{salMonth=new Date(salMonth.getFullYear(),salMonth.getMonth()+d,1);}renderSalary();}
-async function genAllSalaries(){
-  const mKey=`${salMonth.getFullYear()}-${pad(salMonth.getMonth()+1)}`;
-  for(const e of EMPS){if(!SALARIES.find(s=>s.empId===e.id&&s.month===mKey)){const base=(e.salary||0)+(e.housing||0)+(e.transport||0);const abs=ATT_EMP.filter(a=>a.empId===e.id&&a.date.startsWith(mKey)&&a.status==='absent').length;const ded=Math.round(abs*(e.salary||0)/30);await dbAdd('salaries',SALARIES,v=>SALARIES=v,{empId:e.id,month:mKey,net:base-ded,paid:false});}}
-  toast('✅ تم توليد الرواتب','ok');renderSalary();
-}
-async function markPaid(empId,mKey,net){
-  const sal=SALARIES.find(s=>s.empId===empId&&s.month===mKey);
-  const data={empId,month:mKey,net,paid:true,paidDate:todayStr()};
-  if(sal){await dbUpd('salaries',SALARIES,v=>SALARIES=v,sal.id,data);}else{await dbAdd('salaries',SALARIES,v=>SALARIES=v,data);}
-  toast('✅ تم تأكيد صرف الراتب','ok');renderSalary();if(document.getElementById('dash-notifs-list'))renderDashNotifs();
-}
 
 // ══ STUDENTS ══
 let editStuId=null,stuTabVal='active',curStuId=null;
