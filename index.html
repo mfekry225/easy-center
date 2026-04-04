@@ -1435,6 +1435,7 @@ body{font-family:'Tajawal',sans-serif;background:var(--g1);color:var(--g8);min-h
       <button class="btn btn-p btn-sm" onclick="calToday()">اليوم</button>
       <button class="btn btn-g btn-sm" onclick="calNav(7)">الأسبوع التالي →</button>
       <button class="btn btn-s btn-sm no-print" onclick="openAppointmentPicker()">➕ موعد جديد</button>
+      <button class="btn btn-g btn-sm no-print" onclick="window.print()" title="طباعة التقويم">🖨️</button>
     </div>
   </div>
   <!-- فلاتر -->
@@ -1445,7 +1446,7 @@ body{font-family:'Tajawal',sans-serif;background:var(--g1);color:var(--g8);min-h
       <button class="btn btn-sm cal-type-btn" data-type="session" onclick="calFilterType('session',this)" style="border-radius:20px;background:var(--pur-l);color:var(--pur)">🩺 جلسات</button>
       <button class="btn btn-sm cal-type-btn" data-type="online" onclick="calFilterType('online',this)" style="border-radius:20px;background:var(--cyan-l);color:var(--cyan)">🌐 أونلاين</button>
       <button class="btn btn-sm cal-type-btn" data-type="assessment" onclick="calFilterType('assessment',this)" style="border-radius:20px;background:var(--warn-l);color:var(--warn)">📋 تقييمات</button>
-      <button class="btn btn-sm cal-type-btn" data-type="center" onclick="calFilterType('center',this)" style="border-radius:20px;background:var(--ok-l);color:var(--ok)">🏢 المركز</button>
+      <button class="btn btn-sm cal-type-btn" data-type="center" id="cal-btn-center" onclick="calFilterType('center',this)" style="border-radius:20px;background:var(--ok-l);color:var(--ok)">🏢 المركز</button>
     </div>
     <select class="fsel" id="cal-spec-filter" onchange="renderCalendar()" style="margin-right:auto">
       <option value="">كل الأخصائيين</option>
@@ -4843,16 +4844,38 @@ function renderReports(){
     </div>`;
   } else if(repTabVal==='students'){
     const byStatus={};STUDENTS.forEach(s=>{const k=s.status||'active';byStatus[k]=(byStatus[k]||0)+1;});
-    const stLblFull={active:'✅ نشط',inactive:'⏸️ منقطع',graduated:'🎓 متخرج',transferred:'🔄 محوّل',waitlist:'⏳ انتظار',rejected:'❌ غير مناسب'};
-    const bySpec={};STUDENTS.filter(s=>s.status==='active').forEach(s=>{const e=EMPS.find(x=>x.id===s.specId);const n=e?.name||'غير محدد';bySpec[n]=(bySpec[n]||0)+1;});
-    // إحصائيات الحالات
     const bySt={};STUDENTS.forEach(s=>{const k=s.status||'active';bySt[k]=(bySt[k]||0)+1;});
     const stLblRep={active:'✅ نشط',inactive:'⏸️ منقطع',graduated:'🎓 متخرج',transferred:'🔄 محوّل',waitlist:'⏳ انتظار',rejected:'❌ غير مناسب'};
+    // إحصائيات البرامج
+    const progCount={morning:0,evening:0,sessions:0,online:0,consult:0};
+    STUDENTS.filter(s=>s.status==='active').forEach(s=>{
+      if(s.progMorning?.enabled)progCount.morning++;
+      if(s.progEvening?.enabled)progCount.evening++;
+      if(s.progSessions?.enabled)progCount.sessions++;
+      if(s.progOnline?.enabled)progCount.online++;
+      if(s.progConsult?.enabled)progCount.consult++;
+    });
+    const actStuRep=STUDENTS.filter(s=>s.status==='active').length||1;
+    const stLblFull={active:'✅ نشط',inactive:'⏸️ منقطع',graduated:'🎓 متخرج',transferred:'🔄 محوّل',waitlist:'⏳ انتظار',rejected:'❌ غير مناسب'};
+    const bySpec={};STUDENTS.filter(s=>s.status==='active').forEach(s=>{const e=EMPS.find(x=>x.id===s.specId);const n=e?.name||'غير محدد';bySpec[n]=(bySpec[n]||0)+1;});
     const ageGroups={'0-3':0,'4-6':0,'7-10':0,'11-14':0,'15+':0};
     STUDENTS.forEach(s=>{if(!s.dob)return;const a=Math.floor((Date.now()-new Date(s.dob))/(365.25*864e5));if(a<=3)ageGroups['0-3']++;else if(a<=6)ageGroups['4-6']++;else if(a<=10)ageGroups['7-10']++;else if(a<=14)ageGroups['11-14']++;else ageGroups['15+']++;});
     const stLbl={active:'✅ نشط',inactive:'⏸️ غير نشط',graduated:'🎓 متخرج',transferred:'🔄 محوّل',waitlist:'⏳ انتظار',rejected:'❌ غير مناسب'};
     w.innerHTML=`
     <div class="g3">
+      <div class="wg"><div class="wg-h"><h3>🎯 توزيع البرامج</h3></div><div class="wg-b">
+        ${[
+          ['morning','☀️ صباحي','var(--warn)'],
+          ['evening','🌙 مسائي','var(--pur)'],
+          ['sessions','🩺 جلسات','var(--pr)'],
+          ['online','🌐 أونلاين','var(--cyan)'],
+          ['consult','💬 استشارة','var(--pink)'],
+        ].map(([k,lbl,c])=>{
+          const cnt=progCount[k]||0;
+          const pct=Math.round(cnt/actStuRep*100);
+          return`<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:.79rem;margin-bottom:3px"><span>${lbl}</span><span style="font-weight:700">${cnt} طالب (${pct}%)</span></div><div class="prog"><div class="prog-f" style="width:${pct}%;background:${c}"></div></div></div>`;
+        }).join('')}
+      </div></div>
       <div class="wg"><div class="wg-h"><h3>📊 بحسب الحالة</h3></div><div class="wg-b">${Object.entries(byStatus).map(([k,v])=>{const pct=STUDENTS.length?Math.round(v/STUDENTS.length*100):0;return`<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:.79rem;margin-bottom:3px"><span>${stLbl[k]||k}</span><span style="font-weight:700">${v} (${pct}%)</span></div><div class="prog"><div class="prog-f ok" style="width:${pct}%"></div></div></div>`;}).join('')||'<div class="empty" style="padding:14px"><div class="et">—</div></div>'}</div></div>
       <div class="wg"><div class="wg-h"><h3>📊 بحسب الحالة</h3></div><div class="wg-b">${Object.entries(bySt).map(([k,v])=>{const pct=STUDENTS.length?Math.round(v/STUDENTS.length*100):0;return`<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:.79rem;margin-bottom:3px"><span>${stLblRep[k]||k}</span><span style="font-weight:700">${v} (${pct}%)</span></div><div class="prog"><div class="prog-f ok" style="width:${pct}%"></div></div></div>`;}).join('')||'<div class="empty" style="padding:14px"><div class="et">—</div></div>'}</div></div>
       <div class="wg"><div class="wg-h"><h3>👤 بحسب الأخصائي</h3></div><div class="wg-b">${Object.entries(bySpec).sort((a,b)=>b[1]-a[1]).map(([n,v])=>{const pct=STUDENTS.length?Math.round(v/STUDENTS.length*100):0;return`<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:.79rem;margin-bottom:3px"><span>${n}</span><span style="font-weight:700">${v}</span></div><div class="prog"><div class="prog-f" style="width:${pct}%;background:var(--pur)"></div></div></div>`;}).join('')||'<div class="empty" style="padding:14px"><div class="et">—</div></div>'}</div></div>
@@ -5434,7 +5457,7 @@ function renderDashNotifs(){
         const isOnline=a.mode==='online'||a.type==='🌐 أونلاين';
         return(s?.name||'—')+(a.time?' '+a.time:'')+(isOnline?' 🌐':'');
       }).join(' · ').slice(0,100);
-      notifs.push({icon:'📅',title:'مواعيد جلسات اليوم ('+todayAppts.length+')',body,urgency:'err',date:'اليوم'});
+      notifs.push({icon:'📅',title:'مواعيد جلسات اليوم ('+todayAppts.length+')',body,urgency:'err',date:'اليوم',calDate:todayStr2});
     }
     // مواعيد الغد من APPTS
     const tmrAppts=APPTS.filter(a=>a.date===tomorrowStr2&&a.status==='scheduled');
@@ -5444,7 +5467,7 @@ function renderDashNotifs(){
         const isOnline=a.mode==='online'||a.type==='🌐 أونلاين';
         return(s?.name||'—')+(a.time?' '+a.time:'')+(isOnline?' 🌐':'')+(a.link?' 🔗':'');
       }).join(' · ').slice(0,100);
-      notifs.push({icon:'📅',title:'مواعيد غداً ('+tmrAppts.length+') 🔔',body,urgency:'warn',date:'غداً'});
+      notifs.push({icon:'📅',title:'مواعيد غداً ('+tmrAppts.length+') 🔔',body,urgency:'warn',date:'غداً',calDate:tomorrowStr2});
     }
   }catch(e){}
 
@@ -5456,16 +5479,16 @@ function renderDashNotifs(){
       const sp=EMPS.find(e=>e.id===s.specId);
       return(st?.name||'—')+(sp?' · '+sp.name:'');
     }).join(' · ').slice(0,100);
-    notifs.push({icon:'🩺',title:'جلسات علاجية اليوم ('+todaySessions.length+')',body,urgency:'bl',date:'اليوم'});
+    notifs.push({icon:'🩺',title:'جلسات علاجية اليوم ('+todaySessions.length+')',body,urgency:'bl',date:'اليوم',calDate:todayStr2});
   }
 
   // ── 4. تقييمات أولية اليوم وغداً ──
   try{
     loadAssessments();
     const todayAssess=ASSESSMENTS.filter(a=>a.status==='pending'&&a.date===todayStr2);
-    todayAssess.forEach(a=>notifs.push({icon:'📋',title:'موعد تقييم اليوم 🔔',body:(a.childName||'—')+(a.time?' · '+a.time:'')+(a.parentName?' · '+a.parentName:''),urgency:'err',date:'اليوم'}));
+    todayAssess.forEach(a=>notifs.push({icon:'📋',title:'موعد تقييم اليوم 🔔',body:(a.childName||'—')+(a.time?' · '+a.time:'')+(a.parentName?' · '+a.parentName:''),urgency:'err',date:'اليوم',calDate:todayStr2}));
     const tmrAssess=ASSESSMENTS.filter(a=>a.status==='pending'&&a.date===tomorrowStr2);
-    if(tmrAssess.length)notifs.push({icon:'📋',title:'مواعيد تقييم غداً ('+tmrAssess.length+')',body:tmrAssess.map(a=>(a.childName||'—')+(a.time?' · '+a.time:'')).join(' · ').slice(0,80),urgency:'warn',date:'غداً'});
+    if(tmrAssess.length)notifs.push({icon:'📋',title:'مواعيد تقييم غداً ('+tmrAssess.length+')',body:tmrAssess.map(a=>(a.childName||'—')+(a.time?' · '+a.time:'')).join(' · ').slice(0,80),urgency:'warn',date:'غداً',calDate:tomorrowStr2});
     // طلاب حضروا التقييم ولم يُسجَّلوا بعد
     const yStr=new Date(today.getTime()-864e5).toISOString().split('T')[0];
     ASSESSMENTS.filter(a=>a.status==='arrived'&&a.date<=yStr).forEach(a=>{
@@ -5549,10 +5572,10 @@ function renderDashNotifs(){
 
   // ── Render ──
   w.innerHTML=notifs.length?notifs.map(n=>`
-    <div class="card${n.docId?' clickable':''}" style="border-right:4px solid var(--${n.urgency==='err'||n.urgency==='rd'?'err':n.urgency==='warn'||n.urgency==='yw'?'warn':'pr'});margin-bottom:6px;cursor:${n.docId?'pointer':'default'}" ${n.docId?`onclick="viewDocFromNotif('${n.docId}')"`:''}>
+    <div class="card${n.docId||n.calDate?' clickable':''}" style="border-right:4px solid var(--${n.urgency==='err'||n.urgency==='rd'?'err':n.urgency==='warn'||n.urgency==='yw'?'warn':'pr'});margin-bottom:6px;cursor:${n.docId||n.calDate?'pointer':'default'}" ${n.docId?`onclick="viewDocFromNotif('${n.docId}')"`:n.calDate?`onclick="calGoToDate('${n.calDate}')"`:''}>
       <div class="av ${n.urgency==='err'||n.urgency==='rd'?'red':n.urgency==='warn'||n.urgency==='yw'?'orange':'blue'}" style="font-size:1.3rem;flex-shrink:0">${n.icon||'🔔'}</div>
       <div class="ci" style="min-width:0">
-        <div class="cn">${n.title}${n.docId?'<span style="font-size:.68rem;color:var(--pr);margin-right:6px">📎</span>':''}</div>
+        <div class="cn">${n.title}${n.docId?'<span style="font-size:.68rem;color:var(--pr);margin-right:6px">📎</span>':''}${n.calDate?'<span style="font-size:.68rem;color:var(--cyan);margin-right:6px">🗓️</span>':''}</div>
         ${n.body?`<div class="cm" style="white-space:normal">${n.body}</div>`:''}
       </div>
       <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex-shrink:0">
@@ -5899,6 +5922,18 @@ function calToday(){
   renderCalendar();
 }
 
+// ── فتح التقويم على تاريخ محدد من التنبيهات ──
+function calGoToDate(dateStr){
+  if(!dateStr) return;
+  const d = new Date(dateStr+'T12:00:00');
+  const day = d.getDay();
+  calStartDate = new Date(d);
+  calStartDate.setDate(d.getDate() - day);
+  calStartDate.setHours(0,0,0,0);
+  go('calendar');
+  setTimeout(()=>calSelectDay(dateStr), 200);
+}
+
 function calFilterType(type, el){
   calTypeFilter = type;
   document.querySelectorAll('.cal-type-btn').forEach(b=>b.classList.remove('on'));
@@ -6015,6 +6050,15 @@ function renderCalendar(){
   const w = document.getElementById('cal-grid');
   const lbl = document.getElementById('cal-period-label');
   if(!w) return;
+
+  // إخفاء فلاتر حسب الدور
+  const role = CUR_USER?.role||'';
+  const centerBtn = document.getElementById('cal-btn-center');
+  if(centerBtn) centerBtn.style.display = ['manager','vice'].includes(role)?'':'none';
+  const assessBtn = document.querySelector('[data-type="assessment"]');
+  if(assessBtn) assessBtn.style.display = role==='parent'?'none':'';
+  const specSelWrap = document.getElementById('cal-spec-filter');
+  if(specSelWrap) specSelWrap.style.display = role==='parent'||role==='specialist'?'none':'';
 
   // ملء فلتر الأخصائيين
   const spSel = document.getElementById('cal-spec-filter');
@@ -6284,7 +6328,8 @@ async function saveOnlineSession(){
   else ONLINE.unshift({id:uid(),...data});
   saveOnline();editOnlineId=null;closeModal('online-form-modal');toast('✅ تم الحفظ','ok');
   if(typeof _onlineDetStuId!=='undefined'&&_onlineDetStuId)openOnlineDetModal(_onlineDetStuId);
-  else if(stuTabVal==='online')renderStudents();renderOnline();
+  else if(stuTabVal==='online')renderStudents();
+  if(document.getElementById('v-calendar')?.classList.contains('on'))renderCalendar();renderOnline();
   if(document.getElementById('dash-notifs-list'))renderDashNotifs();
 }
 function delOnline(id){if(!confirm('حذف هذه الجلسة؟'))return;loadOnline();ONLINE=ONLINE.filter(x=>x.id!==id);saveOnline();toast('🗑️ تم الحذف','ok');renderOnline();}
