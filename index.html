@@ -2445,6 +2445,8 @@ let db=null;
 const isLocal=()=>!(FB_CFG.apiKey&&FB_CFG.projectId);
 const pfx=()=>'scs_'+(CENTER.name||'c').replace(/\W/g,'_')+'_';
 const pad=n=>String(n).padStart(2,'0');
+function fmtDate(d){if(!d)return'—';const dt=typeof d==='string'?new Date(d+'T00:00:00'):d;if(isNaN(dt))return'—';return dt.toLocaleDateString('ar',{day:'numeric',month:'long',year:'numeric'});}
+function fmtDateTime(d,t){if(!d)return'—';const dt=new Date(d+'T'+(t||'00:00'));if(isNaN(dt))return'—';return dt.toLocaleDateString('ar',{weekday:'short',day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});}
 const todayStr=()=>new Date().toISOString().split('T')[0];
 
 function syncInd(t){const e=document.getElementById('nav-sync');if(e)e.textContent=t;}
@@ -2611,7 +2613,7 @@ function attQuickTab(t,el){
 }
 function renderAttendance(){
   const lbl=document.getElementById('att-quick-date-lbl');
-  if(lbl)lbl.textContent=attQuickDate2.toLocaleDateString('ar-SA',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  if(lbl)lbl.textContent=attQuickDate2.toLocaleDateString('ar',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   renderAttQuickStats();
   renderAttQuickList();
 }
@@ -2915,7 +2917,7 @@ function sendWhatsApp(phone,name){
   const cleaned=phone.replace(/[^0-9+]/g,'');
   const intl=cleaned.startsWith('0')?'966'+cleaned.slice(1):cleaned.startsWith('+')?cleaned.slice(1):cleaned;
   const ds=getAttQuickDateStr();
-  const dateAr=attQuickDate2.toLocaleDateString('ar-SA',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const dateAr=attQuickDate2.toLocaleDateString('ar',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   const msg=encodeURIComponent(`السلام عليكم ورحمة الله وبركاته\nولي أمر الطالب/ة: ${name}\nنُود إبلاغكم بأن ${name} لم يسجل حضوره اليوم ${dateAr}.\nيرجى التواصل مع المركز للتأكيد.\nشكراً لتعاونكم 🙏`);
   window.open(`https://wa.me/${intl}?text=${msg}`,'_blank');
 }
@@ -3383,10 +3385,10 @@ function updateCounts(){
 // ══ DASHBOARD ══
 function renderDashClock(){
   const now=new Date();const h=now.getHours();
-  const timeStr=now.toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const timeStr=now.toLocaleTimeString('ar',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
   const userName=CUR_USER?.name?'، '+CUR_USER.name:'';
   const greeting=(h>=5&&h<12?'صباح الخير ☀️':h>=12&&h<18?'مساء الخير 🌤️':'مساء النور 🌙')+userName;
-  const dateStr=now.toLocaleDateString('ar-SA',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const dateStr=now.toLocaleDateString('ar',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   const cl=document.getElementById('dash-clock');if(cl)cl.textContent=timeStr;
   const gr=document.getElementById('dash-greeting');if(gr)gr.textContent=greeting;
   // dash-center-user replaced by dash-welcome-center/user
@@ -3414,7 +3416,7 @@ function renderDash(){
   if(ll){const pnd=LEAVES.filter(l=>l.status==='pending');ll.innerHTML=pnd.length?pnd.slice(0,4).map(l=>{const e=EMPS.find(x=>x.id===l.empId);return`<div style="display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--g1);gap:10px"><span style="font-size:1.3rem">🌴</span><div style="flex:1"><div style="font-size:.83rem;font-weight:700">${e?.name||'—'}</div><div style="font-size:.72rem;color:var(--g4)">${l.type||'إجازة'} · ${l.from||'—'} → ${l.to||'—'}</div></div><span class="bdg b-yw">⏳ انتظار</span></div>`;}).join(''):'<div class="empty" style="padding:20px"><div class="et">لا توجد طلبات انتظار</div></div>';}
   // Sessions
   const sl=document.getElementById('dash-sessions');
-  if(sl)sl.innerHTML=SESSIONS.slice(0,5).map(ss=>{const k=STUDENTS.find(x=>x.id===ss.stuId);const cls=ss.result==='achieved'?'b-gr':ss.result==='partial'?'b-yw':ss.result?'b-rd':'b-gy';return`<div style="display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--g1);gap:10px"><div class="av purple" style="width:32px;height:32px;border-radius:7px;font-size:.78rem">${(k?.name||'?').slice(0,2)}</div><div style="flex:1"><div style="font-size:.83rem;font-weight:700">${k?.name||'—'}</div><div style="font-size:.72rem;color:var(--g4)">${ss.type||''} · ${ss.date?new Date(ss.date).toLocaleDateString('ar-SA'):''}</div></div>${ss.result?`<span class="bdg ${cls}">${ss.result==='achieved'?'✅':ss.result==='partial'?'⚠️':'❌'}</span>`:''}</div>`;}).join('')||'<div class="empty" style="padding:20px"><div class="et">لا توجد جلسات</div></div>';
+  if(sl)sl.innerHTML=SESSIONS.slice(0,5).map(ss=>{const k=STUDENTS.find(x=>x.id===ss.stuId);const cls=ss.result==='achieved'?'b-gr':ss.result==='partial'?'b-yw':ss.result?'b-rd':'b-gy';return`<div style="display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--g1);gap:10px"><div class="av purple" style="width:32px;height:32px;border-radius:7px;font-size:.78rem">${(k?.name||'?').slice(0,2)}</div><div style="flex:1"><div style="font-size:.83rem;font-weight:700">${k?.name||'—'}</div><div style="font-size:.72rem;color:var(--g4)">${ss.type||''} · ${ss.date?fmtDate(ss.date):''}</div></div>${ss.result?`<span class="bdg ${cls}">${ss.result==='achieved'?'✅':ss.result==='partial'?'⚠️':'❌'}</span>`:''}</div>`;}).join('')||'<div class="empty" style="padding:20px"><div class="et">لا توجد جلسات</div></div>';
 }
 
 // ══ HR EMPLOYEES ══
@@ -3493,7 +3495,7 @@ function showEmpDet(id){
     <div class="det-hd"><div class="det-av blue">${(e.name||'?').slice(0,2)}</div><div class="det-info"><h2>${e.name}</h2><p>${roleLabel(e.role)} · ${e.phone||'—'}</p></div>
     <div class="det-acts no-print"><button class="btn btn-g btn-sm" onclick="editEmp('${id}')">✏️ تعديل</button><button class="btn btn-g btn-sm" onclick="document.getElementById('hr-att-emp').value='${id}';go('hr-att')">📅 الحضور</button><button class="btn btn-g btn-sm" onclick="go('hr')">← رجوع</button></div></div>
     <div class="info-grid">
-      <div class="ic"><h4>الوظيفة</h4><div class="ir"><span class="il">المسمى:</span><span class="iv">${roleLabel(e.role)}</span></div><div class="ir"><span class="il">التعيين:</span><span class="iv">${e.hireDate?new Date(e.hireDate).toLocaleDateString('ar-SA'):'—'}</span></div><div class="ir"><span class="il">العقد:</span><span class="iv">${e.contractType||'—'}</span></div>${e.workStart||e.workEnd?`<div class="ir"><span class="il">الدوام:</span><span class="iv">${e.workStart||'—'} → ${e.workEnd||'—'}</span></div>`:''}${e.workDays?`<div class="ir"><span class="il">الأيام:</span><span class="iv" style="font-size:.76rem">${e.workDays.split(',').map(d=>({sun:'أح',mon:'إث',tue:'ثل',wed:'أر',thu:'خم',fri:'جم',sat:'سب'})[d]||d).join(' · ')}</span></div>`:''}</div>
+      <div class="ic"><h4>الوظيفة</h4><div class="ir"><span class="il">المسمى:</span><span class="iv">${roleLabel(e.role)}</span></div><div class="ir"><span class="il">التعيين:</span><span class="iv">${e.hireDate?fmtDate(e.hireDate):'—'}</span></div><div class="ir"><span class="il">العقد:</span><span class="iv">${e.contractType||'—'}</span></div>${e.workStart||e.workEnd?`<div class="ir"><span class="il">الدوام:</span><span class="iv">${e.workStart||'—'} → ${e.workEnd||'—'}</span></div>`:''}${e.workDays?`<div class="ir"><span class="il">الأيام:</span><span class="iv" style="font-size:.76rem">${e.workDays.split(',').map(d=>({sun:'أح',mon:'إث',tue:'ثل',wed:'أر',thu:'خم',fri:'جم',sat:'سب'})[d]||d).join(' · ')}</span></div>`:''}</div>
       <div class="ic"><h4>الراتب</h4><div class="ir"><span class="il">أساسي:</span><span class="iv" style="color:var(--ok)">${(e.salary||0).toLocaleString()} ر</span></div><div class="ir"><span class="il">بدلات:</span><span class="iv">${((e.housing||0)+(e.transport||0)).toLocaleString()} ر</span></div><div class="ir"><span class="il">الإجمالي:</span><span class="iv" style="color:var(--pr);font-weight:900">${((e.salary||0)+(e.housing||0)+(e.transport||0)).toLocaleString()} ر</span></div></div>
       <div class="ic"><h4>رصيد الإجازات</h4><div class="ir"><span class="il">المخصص:</span><span class="iv">${total} يوم</span></div><div class="ir"><span class="il">المستخدم:</span><span class="iv" style="color:var(--warn)">${used} يوم</span></div><div class="ir"><span class="il">المتبقي:</span><span class="iv" style="color:${bal<5?'var(--err)':'var(--ok)'}">${bal} يوم</span></div><div class="prog" style="margin-top:8px"><div class="prog-f ${pct>80?'err':pct>60?'warn':'ok'}" style="width:${pct}%"></div></div></div>
       <div class="ic"><h4>الخبرة</h4><div class="ir"><span class="il">المؤهل:</span><span class="iv">${e.edu||'—'}</span></div><div class="ir"><span class="il">الخبرة:</span><span class="iv">${e.exp?e.exp+' سنوات':'—'}</span></div></div>
@@ -3767,7 +3769,7 @@ function showStuDet(id){
     <div class="det-hd"><div class="det-av" style="background:linear-gradient(135deg,var(--pur),#ec4899)">${(s.name||'?').slice(0,2)}</div><div class="det-info"><h2>${s.name} ${s.gen==='ذكر'?'👦':s.gen==='أنثى'?'👧':''}</h2><p>${calcAge(s.dob)} · ${s.diag||'—'} · اليوم: ${ta?.status==='present'?'✅ حاضر':ta?.status==='absent'?'❌ غائب':ta?.status==='late'?'⚠️ متأخر':'—'}</p></div>
     <div class="det-acts no-print">${role!=='parent'?`<button class="btn btn-g btn-sm" onclick="editStu('${id}')">✏️ تعديل</button>`:''}<button class="btn btn-v btn-sm" onclick="go('iep')">📋 IEP</button><button class="btn btn-p btn-sm" onclick="openSessForm('${id}')">➕ جلسة</button><button class="btn btn-o btn-sm" onclick="openAppointmentPicker('${id}')">📅 موعد</button><button class="btn btn-g btn-sm" onclick="go('students')">← رجوع</button></div></div>
     <div class="info-grid">
-      <div class="ic"><h4>البيانات الشخصية</h4><div class="ir"><span class="il">الميلاد:</span><span class="iv">${s.dob?new Date(s.dob).toLocaleDateString('ar-SA'):'—'}</span></div><div class="ir"><span class="il">العمر:</span><span class="iv" style="color:var(--pr);font-weight:900">${calcAge(s.dob)}</span></div><div class="ir"><span class="il">الجنس:</span><span class="iv">${s.gen||'—'}</span></div><div class="ir"><span class="il">الجنسية:</span><span class="iv">${s.nat||'—'}</span></div></div>
+      <div class="ic"><h4>البيانات الشخصية</h4><div class="ir"><span class="il">الميلاد:</span><span class="iv">${s.dob?fmtDate(s.dob):'—'}</span></div><div class="ir"><span class="il">العمر:</span><span class="iv" style="color:var(--pr);font-weight:900">${calcAge(s.dob)}</span></div><div class="ir"><span class="il">الجنس:</span><span class="iv">${s.gen||'—'}</span></div><div class="ir"><span class="il">الجنسية:</span><span class="iv">${s.nat||'—'}</span></div></div>
       <div class="ic"><h4>المعلومات الطبية</h4><div class="ir"><span class="il">التشخيص:</span><span class="iv">${s.diag||'—'}</span></div>${s.diag2?`<div class="ir"><span class="il">إضافية:</span><span class="iv">${s.diag2}</span></div>`:''}<div class="ir"><span class="il">الطبيب:</span><span class="iv">${s.doctor||'—'}</span></div>${s.meds?`<div class="ir"><span class="il">الأدوية:</span><span class="iv">${s.meds}</span></div>`:''}${s.medNotes?`<div style="margin-top:8px;padding:8px;background:var(--warn-l);border-radius:6px;font-size:.78rem;color:var(--warn)">⚠️ ${s.medNotes}</div>`:''}</div>
       <div class="ic"><h4>ولي الأمر</h4><div class="ir"><span class="il">الاسم:</span><span class="iv">${s.parentName||'—'}</span></div><div class="ir"><span class="il">الصلة:</span><span class="iv">${s.parentRel||'—'}</span></div><div class="ir"><span class="il">الجوال:</span><span class="iv"><a href="tel:${s.parentPhone}" style="color:var(--pr)">${s.parentPhone||'—'}</a></span></div></div>
       <div class="ic"><h4>الأخصائي والبرامج</h4>${spec?`<div class="ir"><span class="il">الأخصائي:</span><span class="iv">${spec.name}</span></div>`:'<p style="color:var(--g4);font-size:.8rem">لم يُعيَّن أخصائي</p>'}
@@ -3783,7 +3785,7 @@ function showStuDet(id){
         <div class="ir"><span class="il">أهداف IEP:</span><span class="iv" style="color:var(--pur)">${iepGoals.length}</span></div>
       </div>
     </div>
-    ${stuSess.length?`<div class="wg"><div class="wg-h"><h3>🩺 آخر الجلسات</h3><button class="btn btn-p btn-sm no-print" onclick="openSessForm('${id}')">➕</button></div><div class="wg-b"><div class="tl">${stuSess.slice(0,5).map(ss=>{const cls=ss.result==='achieved'?'b-gr':ss.result==='partial'?'b-yw':'b-rd';return`<div class="ti"><div class="ti-d">${ss.date?new Date(ss.date).toLocaleDateString('ar-SA'):''} · ${ss.type||''}</div><div class="ti-t">${ss.goal||'—'}</div>${ss.result?`<span class="bdg ${cls}" style="display:inline-flex;margin-top:3px">${ss.result==='achieved'?'✅ محقق':ss.result==='partial'?'⚠️ جزئي':'❌'}</span>`:''}</div>`;}).join('')}</div></div></div>`:''}
+    ${stuSess.length?`<div class="wg"><div class="wg-h"><h3>🩺 آخر الجلسات</h3><button class="btn btn-p btn-sm no-print" onclick="openSessForm('${id}')">➕</button></div><div class="wg-b"><div class="tl">${stuSess.slice(0,5).map(ss=>{const cls=ss.result==='achieved'?'b-gr':ss.result==='partial'?'b-yw':'b-rd';return`<div class="ti"><div class="ti-d">${ss.date?fmtDate(ss.date):''} · ${ss.type||''}</div><div class="ti-t">${ss.goal||'—'}</div>${ss.result?`<span class="bdg ${cls}" style="display:inline-flex;margin-top:3px">${ss.result==='achieved'?'✅ محقق':ss.result==='partial'?'⚠️ جزئي':'❌'}</span>`:''}</div>`;}).join('')}</div></div></div>`:''}
     ${(()=>{
       loadAppts();
       const today=todayStr();
@@ -3796,7 +3798,7 @@ function showStuDet(id){
           <div style="font-size:1.3rem">${modeIcon(a.mode)}</div>
           <div style="flex:1">
             <div style="font-size:.85rem;font-weight:700">${a.type||'جلسة'} · ${a.dur||''}</div>
-            <div style="font-size:.75rem;color:var(--g5)">${a.date?new Date(a.date+'T'+(a.time||'00:00')).toLocaleString('ar-SA',{weekday:'long',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):''} · ${sp?.name||'—'}</div>
+            <div style="font-size:.75rem;color:var(--g5)">${a.date?new Date(a.date+'T'+(a.time||'00:00')).toLocaleString('ar',{weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}):''} · ${sp?.name||'—'}</div>
             ${a.link?`<a href="${a.link}" target="_blank" style="font-size:.72rem;color:var(--cyan)">🔗 رابط الاجتماع</a>`:''}
             ${a.link?`<a href="${a.link}" target="_blank" style="font-size:.72rem;color:var(--cyan)">🔗 رابط الاجتماع</a>`:''}
           </div>
@@ -3807,7 +3809,7 @@ function showStuDet(id){
           </div>
         </div>`;}).join(''):`<div class="empty" style="padding:16px"><div class="et">لا مواعيد قادمة — اضغط ➕ لإضافة موعد</div></div>`}
       </div></div>
-      ${past.length?`<div class="wg"><div class="wg-h"><h3>📋 آخر مواعيد مسجلة</h3></div><div class="wg-b p0">${past.map(a=>{const sp=EMPS.find(e=>e.id===a.specId);return`<div style="display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--g1)"><div style="flex:1"><div style="font-size:.82rem;font-weight:600">${a.type||'جلسة'} · ${a.date?new Date(a.date).toLocaleDateString('ar-SA'):''}</div><div style="font-size:.72rem;color:var(--g5)">${sp?.name||'—'}</div></div>${statusBdg(a.status)}</div>`;}).join('')}</div></div>`:''}`;
+      ${past.length?`<div class="wg"><div class="wg-h"><h3>📋 آخر مواعيد مسجلة</h3></div><div class="wg-b p0">${past.map(a=>{const sp=EMPS.find(e=>e.id===a.specId);return`<div style="display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--g1)"><div style="flex:1"><div style="font-size:.82rem;font-weight:600">${a.type||'جلسة'} · ${a.date?fmtDate(a.date):''}</div><div style="font-size:.72rem;color:var(--g5)">${sp?.name||'—'}</div></div>${statusBdg(a.status)}</div>`;}).join('')}</div></div>`:''}`;
     })()}
     ${iepGoals.length?`<div class="wg"><div class="wg-h"><h3>📋 أهداف IEP</h3><button class="btn btn-v btn-sm no-print" onclick="go('iep')">عرض الكل</button></div><div class="wg-b">${iepGoals.slice(0,3).map(g=>`<div class="iep-goal"><div class="iep-goal-hd"><span class="bdg b-bl">${g.domain||'—'}</span><span style="margin-right:auto;font-size:.78rem;color:var(--g5)">${g.pct||0}%</span></div><div style="font-size:.84rem;font-weight:600">${g.goal}</div><div class="prog" style="margin-top:6px"><div class="prog-f ${(g.pct||0)>=80?'ok':'warn'}" style="width:${g.pct||0}%"></div></div></div>`).join('')}</div></div>`:''}`;
   go('stu-det');
@@ -3861,7 +3863,7 @@ function renderAssessments(){
         <div class="av orange" style="font-size:1.4rem">📋</div>
         <div class="ci">
           <div class="cn">${a.childName||'—'} <span style="font-size:.72rem;color:var(--g4)">· ${a.parentName||'—'}</span></div>
-          <div class="cm">${a.date?new Date(a.date+'T'+( a.time||'00:00')).toLocaleString('ar-SA',{weekday:'short',year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):''} · ${spec?.name||'—'}</div>
+          <div class="cm">${a.date?new Date(a.date+'T'+( a.time||'00:00')).toLocaleString('ar',{weekday:'short',day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}):''} · ${spec?.name||'—'}</div>
           ${a.reason?`<div class="cm" style="margin-top:2px">📝 ${a.reason}</div>`:''}
           ${isPast?`<div style="font-size:.7rem;color:var(--warn);margin-top:3px">⚠️ الموعد مضى — يرجى تحديث الحالة</div>`:''}
         </div>
@@ -4106,7 +4108,7 @@ function renderSessions(){
   const role=CUR_USER?.role;
   let list=SESSIONS.filter(s=>{if(role==='specialist'&&STUDENTS.find(k=>k.id===s.stuId)?.specId!==CUR_USER.empId)return false;if(role==='parent'&&s.stuId!==CUR_USER.kidId)return false;return(!fs||s.stuId===fs)&&(!ft||s.type===ft);}).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   const w=document.getElementById('sess-list');if(!w)return;
-  w.innerHTML=list.length?list.map(ss=>{const k=STUDENTS.find(x=>x.id===ss.stuId);const sp=EMPS.find(x=>x.id===ss.specId);const cls=ss.result==='achieved'?'b-gr':ss.result==='partial'?'b-yw':ss.result?'b-rd':'b-gy';return`<div class="card"><div class="av purple">${(k?.name||'?').slice(0,2)}</div><div class="ci"><div class="cn">${k?.name||'—'} · ${ss.type||'—'}</div><div class="cm">${ss.date?new Date(ss.date).toLocaleDateString('ar-SA'):''} · ${ss.dur||''} · ${sp?.name||'—'}</div>${ss.goal?`<div class="cm" style="margin-top:2px">🎯 ${ss.goal}</div>`:''}</div>${ss.result?`<span class="bdg ${cls}">${ss.result==='achieved'?'✅ محقق':ss.result==='partial'?'⚠️ جزئي':'❌'}</span>`:''}<div class="c-acts"><button class="btn btn-g btn-xs" onclick="editSess('${ss.id}')">✏️</button><button class="btn btn-d btn-xs" onclick="confirmDel('sessions',SESSIONS,v=>SESSIONS=v,'${ss.id}','حذف الجلسة؟')">🗑️</button></div></div>`;}).join(''):
+  w.innerHTML=list.length?list.map(ss=>{const k=STUDENTS.find(x=>x.id===ss.stuId);const sp=EMPS.find(x=>x.id===ss.specId);const cls=ss.result==='achieved'?'b-gr':ss.result==='partial'?'b-yw':ss.result?'b-rd':'b-gy';return`<div class="card"><div class="av purple">${(k?.name||'?').slice(0,2)}</div><div class="ci"><div class="cn">${k?.name||'—'} · ${ss.type||'—'}</div><div class="cm">${ss.date?fmtDate(ss.date):''} · ${ss.dur||''} · ${sp?.name||'—'}</div>${ss.goal?`<div class="cm" style="margin-top:2px">🎯 ${ss.goal}</div>`:''}</div>${ss.result?`<span class="bdg ${cls}">${ss.result==='achieved'?'✅ محقق':ss.result==='partial'?'⚠️ جزئي':'❌'}</span>`:''}<div class="c-acts"><button class="btn btn-g btn-xs" onclick="editSess('${ss.id}')">✏️</button><button class="btn btn-d btn-xs" onclick="confirmDel('sessions',SESSIONS,v=>SESSIONS=v,'${ss.id}','حذف الجلسة؟')">🗑️</button></div></div>`;}).join(''):
   `<div class="empty"><div class="ei">🩺</div><div class="et">لا توجد جلسات</div></div>`;
 }
 function openSessForm(stuId){
@@ -4129,12 +4131,12 @@ async function saveSess(){
 
 // ── Kids Attendance ──
 function renderAttKids(){
-  const ds=attKidsDate.toLocaleDateString('ar-SA',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const ds=attKidsDate.toLocaleDateString('ar',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   const isToday=attKidsDate.toISOString().split('T')[0]===todayStr();
   ['att-kids-lbl','att-kids-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=ds;});
   // Update today button to show date
   const todayBtn=document.getElementById('att-today-btn');
-  if(todayBtn) todayBtn.textContent=isToday?'📅 '+attKidsDate.toLocaleDateString('ar-SA',{weekday:'short',day:'numeric',month:'short'}):attKidsDate.toLocaleDateString('ar-SA',{weekday:'short',day:'numeric',month:'short'});
+  if(todayBtn) todayBtn.textContent=isToday?'📅 '+attKidsDate.toLocaleDateString('ar',{weekday:'short',day:'numeric',month:'long'}):attKidsDate.toLocaleDateString('ar',{weekday:'short',day:'numeric',month:'long'});
   const dateStr=attKidsDate.toISOString().split('T')[0];
   const role=CUR_USER?.role;
   let list=STUDENTS.filter(s=>{if(['waitlist','rejected','inactive','transferred'].includes(s.status))return false;if(role==='specialist'&&s.specId!==CUR_USER.empId)return false;if(role==='parent'&&s.id!==CUR_USER.kidId)return false;return true;});
@@ -4174,17 +4176,17 @@ function renderParents(){
       cw.innerHTML=fl.length?fl.map(c=>{
         const k=STUDENTS.find(x=>x.id===c.kidId);
         const tCls=c.type==='outgoing'?'b-gr':c.type==='missed'?'b-rd':'b-bl';
-        return`<div class="card"><div class="av cyan" style="font-size:1.3rem">📞</div><div class="ci"><div class="cn">${k?.parentName||'—'} — ${k?.name||'—'}</div><div class="cm">${c.date?new Date(c.date).toLocaleDateString('ar-SA'):''} ${c.time?'· '+c.time:''} · ${c.dur||''} · ${c.purpose||''}</div><div class="cm" style="margin-top:2px">${c.notes}</div>${c.action?`<div class="cm" style="color:var(--ok)">✅ ${c.action}</div>`:''}</div><div class="c-badges"><span class="bdg ${tCls}">${callTypeMap[c.type]||'—'}</span></div><div class="c-acts"><button class="btn btn-d btn-xs" onclick="delCall('${c.id}')">🗑️</button></div></div>`;
+        return`<div class="card"><div class="av cyan" style="font-size:1.3rem">📞</div><div class="ci"><div class="cn">${k?.parentName||'—'} — ${k?.name||'—'}</div><div class="cm">${c.date?fmtDate(c.date):''} ${c.time?'· '+c.time:''} · ${c.dur||''} · ${c.purpose||''}</div><div class="cm" style="margin-top:2px">${c.notes}</div>${c.action?`<div class="cm" style="color:var(--ok)">✅ ${c.action}</div>`:''}</div><div class="c-badges"><span class="bdg ${tCls}">${callTypeMap[c.type]||'—'}</span></div><div class="c-acts"><button class="btn btn-d btn-xs" onclick="delCall('${c.id}')">🗑️</button></div></div>`;
       }).join(''):`<div class="empty"><div class="ei">📞</div><div class="et">لا توجد مكالمات مسجلة</div></div>`;
     },10);
   }
   else if(parTabVal==='visits'){
     const vis=[...VISITS].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-    w.innerHTML=vis.length?vis.map(v=>{const k=STUDENTS.find(x=>x.id===v.kidId);return`<div class="card"><div class="av orange" style="font-size:1.3rem">🚶</div><div class="ci"><div class="cn">${k?.parentName||'—'} — والد/ة ${k?.name||'—'}</div><div class="cm">${v.date?new Date(v.date).toLocaleDateString('ar-SA'):''} · ${v.purpose||''}</div></div><button class="btn btn-d btn-xs" onclick="confirmDel('visits',VISITS,v=>VISITS=v,'${v.id}','حذف الزيارة؟')">🗑️</button></div>`;}).join(''):`<div class="empty"><div class="ei">🚶</div><div class="et">لا توجد زيارات</div></div>`;
+    w.innerHTML=vis.length?vis.map(v=>{const k=STUDENTS.find(x=>x.id===v.kidId);return`<div class="card"><div class="av orange" style="font-size:1.3rem">🚶</div><div class="ci"><div class="cn">${k?.parentName||'—'} — والد/ة ${k?.name||'—'}</div><div class="cm">${v.date?fmtDate(v.date):''} · ${v.purpose||''}</div></div><button class="btn btn-d btn-xs" onclick="confirmDel('visits',VISITS,v=>VISITS=v,'${v.id}','حذف الزيارة؟')">🗑️</button></div>`;}).join(''):`<div class="empty"><div class="ei">🚶</div><div class="et">لا توجد زيارات</div></div>`;
   }
   else{
     const cs=[...COUNSELING].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-    w.innerHTML=cs.length?cs.map(c=>{const k=STUDENTS.find(x=>x.id===c.kidId);const sp=EMPS.find(e=>e.id===c.specId);return`<div class="card"><div class="av orange" style="font-size:1.3rem">🤝</div><div class="ci"><div class="cn">${k?.parentName||'—'} — ${c.type||''}</div><div class="cm">${c.date?new Date(c.date).toLocaleDateString('ar-SA'):''} · ${sp?.name||'—'}</div>${c.notes?`<div class="cm">${c.notes}</div>`:''}</div><span class="bdg b-cy">${c.dur||''}</span></div>`;}).join(''):`<div class="empty"><div class="ei">🤝</div><div class="et">لا توجد جلسات إرشادية</div></div>`;
+    w.innerHTML=cs.length?cs.map(c=>{const k=STUDENTS.find(x=>x.id===c.kidId);const sp=EMPS.find(e=>e.id===c.specId);return`<div class="card"><div class="av orange" style="font-size:1.3rem">🤝</div><div class="ci"><div class="cn">${k?.parentName||'—'} — ${c.type||''}</div><div class="cm">${c.date?fmtDate(c.date):''} · ${sp?.name||'—'}</div>${c.notes?`<div class="cm">${c.notes}</div>`:''}</div><span class="bdg b-cy">${c.dur||''}</span></div>`;}).join(''):`<div class="empty"><div class="ei">🤝</div><div class="et">لا توجد جلسات إرشادية</div></div>`;
   }
 }
 function delCall(id){loadCalls();if(!confirm('حذف هذه المكالمة؟'))return;CALLS=CALLS.filter(x=>x.id!==id);saveCalls();renderParents();toast('🗑️ تم الحذف','ok');}
@@ -4200,7 +4202,7 @@ let progTabVal='all',editProgId=null;
 function progTab(t,el){progTabVal=t;document.querySelectorAll('#v-programs .tab').forEach(b=>b.classList.remove('on'));el?.classList.add('on');renderProgs();}
 function renderProgs(){
   const w=document.getElementById('programs-content');if(!w)return;
-  if(progTabVal==='calendar'){const up=PROGRAMS.filter(p=>p.from&&new Date(p.from)>=new Date()).sort((a,b)=>a.from.localeCompare(b.from)).slice(0,10);w.innerHTML=up.length?`<div class="tl">${up.map(p=>`<div class="ti"><div class="ti-d">${new Date(p.from).toLocaleDateString('ar-SA')}${p.to?' → '+new Date(p.to).toLocaleDateString('ar-SA'):''}</div><div class="ti-t">${p.type==='trip'?'✈️':p.type==='event'?'🎪':'📚'} ${p.name}</div>${p.location?`<div style="font-size:.75rem;color:var(--g4)">📍 ${p.location}</div>`:''}</div>`).join('')}</div>`:`<div class="empty"><div class="ei">📅</div><div class="et">لا توجد أحداث قادمة</div></div>`;return;}
+  if(progTabVal==='calendar'){const up=PROGRAMS.filter(p=>p.from&&new Date(p.from)>=new Date()).sort((a,b)=>a.from.localeCompare(b.from)).slice(0,10);w.innerHTML=up.length?`<div class="tl">${up.map(p=>`<div class="ti"><div class="ti-d">${fmtDate(p.from)}${p.to?' → '+fmtDate(p.to):''}</div><div class="ti-t">${p.type==='trip'?'✈️':p.type==='event'?'🎪':'📚'} ${p.name}</div>${p.location?`<div style="font-size:.75rem;color:var(--g4)">📍 ${p.location}</div>`:''}</div>`).join('')}</div>`:`<div class="empty"><div class="ei">📅</div><div class="et">لا توجد أحداث قادمة</div></div>`;return;}
   const list=PROGRAMS.filter(p=>progTabVal==='all'||p.type===progTabVal).sort((a,b)=>(b.from||'').localeCompare(a.from||''));
   const stMap={planned:{cls:'b-bl',tx:'مخطط'},active:{cls:'b-gr',tx:'جاري'},done:{cls:'b-gy',tx:'منتهي'},cancelled:{cls:'b-rd',tx:'ملغى'}};
   w.innerHTML=list.length?list.map(p=>{const sm=stMap[p.status]||{cls:'b-gy',tx:'—'};const resp=EMPS.find(e=>e.id===p.respId);return`<div class="card"><div class="av cyan" style="font-size:1.3rem">${p.type==='trip'?'✈️':p.type==='event'?'🎪':'📚'}</div><div class="ci"><div class="cn">${p.name}</div><div class="cm">${p.from||'—'}${p.to?' → '+p.to:''} · ${p.location||'—'} · ${resp?.name||'—'}</div></div><span class="bdg ${sm.cls}">${sm.tx}</span><div class="c-acts"><button class="btn btn-g btn-xs" onclick="editProg('${p.id}')">✏️</button><button class="btn btn-d btn-xs" onclick="confirmDel('programs',PROGRAMS,v=>PROGRAMS=v,'${p.id}','حذف النشاط؟')">🗑️</button></div></div>`;}).join(''):
@@ -4218,7 +4220,7 @@ function renderVols(){
   const w=document.getElementById('vol-content');if(!w)return;
   if(volTabVal==='volunteers'){w.innerHTML=VOLUNTEERS.length?VOLUNTEERS.map(v=>{const hrs=VOL_HOURS.filter(h=>h.volId===v.id).reduce((s,h)=>s+(parseFloat(h.hours)||0),0);return`<div class="card"><div class="av cyan">${(v.name||'?').slice(0,2)}</div><div class="ci"><div class="cn">${v.name}</div><div class="cm">${v.skill||'—'} · ${v.phone||'—'}</div></div><div style="background:linear-gradient(135deg,var(--ok),#0ea5e9);color:white;border-radius:10px;padding:8px 14px;text-align:center;min-width:80px"><div style="font-size:1.5rem;font-weight:900">${hrs}</div><div style="font-size:.68rem;opacity:.85">ساعة</div></div><span class="bdg ${v.status==='active'?'b-gr':'b-gy'}">${v.status==='active'?'نشط':'—'}</span><div class="c-acts"><button class="btn btn-g btn-xs" onclick="editVol('${v.id}')">✏️</button><button class="btn btn-d btn-xs" onclick="confirmDel('volunteers',VOLUNTEERS,v=>VOLUNTEERS=v,'${v.id}','حذف المتطوع؟')">🗑️</button></div></div>`;}).join(''):
   `<div class="empty"><div class="ei">🤝</div><div class="et">لا يوجد متطوعون</div></div>`;}
-  else if(volTabVal==='hours'){const hrs=[...VOL_HOURS].sort((a,b)=>(b.date||'').localeCompare(a.date||''));w.innerHTML=hrs.length?hrs.map(h=>{const v=VOLUNTEERS.find(x=>x.id===h.volId);return`<div class="card"><div class="av cyan" style="font-size:1.3rem">⏱️</div><div class="ci"><div class="cn">${v?.name||'—'}</div><div class="cm">${h.date?new Date(h.date).toLocaleDateString('ar-SA'):''} · ${h.activity||''}</div></div><span class="bdg b-cy">${h.hours} ساعة</span><button class="btn btn-d btn-xs" onclick="confirmDel('volHours',VOL_HOURS,v=>VOL_HOURS=v,'${h.id}','حذف السجل؟')">🗑️</button></div>`;}).join(''):
+  else if(volTabVal==='hours'){const hrs=[...VOL_HOURS].sort((a,b)=>(b.date||'').localeCompare(a.date||''));w.innerHTML=hrs.length?hrs.map(h=>{const v=VOLUNTEERS.find(x=>x.id===h.volId);return`<div class="card"><div class="av cyan" style="font-size:1.3rem">⏱️</div><div class="ci"><div class="cn">${v?.name||'—'}</div><div class="cm">${h.date?fmtDate(h.date):''} · ${h.activity||''}</div></div><span class="bdg b-cy">${h.hours} ساعة</span><button class="btn btn-d btn-xs" onclick="confirmDel('volHours',VOL_HOURS,v=>VOL_HOURS=v,'${h.id}','حذف السجل؟')">🗑️</button></div>`;}).join(''):
   `<div class="empty"><div class="ei">⏱️</div><div class="et">لا توجد سجلات ساعات</div></div>`;}
 
 }
@@ -4251,7 +4253,7 @@ function disableTechCode(){
 function showEmergencyDoc(){
   if(CUR_USER?.role!=='manager'){toast('⚠️ للمدير فقط','er');return;}
   const tc=CENTER.techCode||'غير مفعّل';
-  const date=new Date().toLocaleDateString('ar-SA',{year:'numeric',month:'long',day:'numeric'});
+  const date=new Date().toLocaleDateString('ar',{year:'numeric',month:'long',day:'numeric'});
   const html=`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>وثيقة الطوارئ التقني</title>
 <style>body{font-family:'Tajawal',Tahoma,sans-serif;background:#f8fafc;color:#1e293b;padding:40px;max-width:700px;margin:0 auto}
 .header{background:linear-gradient(135deg,#0f172a,#1e3a5f);color:white;padding:30px;border-radius:16px;text-align:center;margin-bottom:24px}
@@ -4642,11 +4644,11 @@ function buildFinanceOverview(){
   </div>
   <div class="g2">
     <div>
-      <div class="wg"><div class="wg-h"><h3>💵 آخر المدفوعات</h3></div><div class="wg-b p0">${recentPay.length?recentPay.map(p=>{const k=STUDENTS.find(x=>x.id===p.stuId);return`<div style="display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--g1);gap:10px"><span style="font-size:1.2rem">💵</span><div style="flex:1"><div style="font-size:.83rem;font-weight:700">${k?.name||'—'}</div><div style="font-size:.72rem;color:var(--g4)">${p.date?new Date(p.date).toLocaleDateString('ar-SA'):''}</div></div><b style="color:var(--ok)">${(parseFloat(p.amount)||0).toLocaleString()} ر</b></div>`;}).join(''):'<div class="empty" style="padding:20px"><div class="et">لا توجد مدفوعات</div></div>'}</div></div>
+      <div class="wg"><div class="wg-h"><h3>💵 آخر المدفوعات</h3></div><div class="wg-b p0">${recentPay.length?recentPay.map(p=>{const k=STUDENTS.find(x=>x.id===p.stuId);return`<div style="display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--g1);gap:10px"><span style="font-size:1.2rem">💵</span><div style="flex:1"><div style="font-size:.83rem;font-weight:700">${k?.name||'—'}</div><div style="font-size:.72rem;color:var(--g4)">${p.date?fmtDate(p.date):''}</div></div><b style="color:var(--ok)">${(parseFloat(p.amount)||0).toLocaleString()} ر</b></div>`;}).join(''):'<div class="empty" style="padding:20px"><div class="et">لا توجد مدفوعات</div></div>'}</div></div>
       <div class="wg"><div class="wg-h"><h3>⚠️ رسوم غير مدفوعة</h3></div><div class="wg-b p0">${unpaidFees.length?unpaidFees.map(f=>{const k=STUDENTS.find(x=>x.id===f.stuId);return`<div style="display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--g1);gap:10px"><span style="font-size:1.2rem">⚠️</span><div style="flex:1"><div style="font-size:.83rem;font-weight:700">${k?.name||'—'}</div><div style="font-size:.72rem;color:var(--g4)">${f.period||f.type||''}</div></div><b style="color:var(--err)">${(parseFloat(f.amount)||0).toLocaleString()} ر</b></div>`;}).join(''):'<div class="empty" style="padding:20px"><div class="et">لا توجد رسوم معلقة 🎉</div></div>'}</div></div>
     </div>
     <div>
-      <div class="wg"><div class="wg-h"><h3>🧾 آخر المصاريف</h3></div><div class="wg-b p0">${recentExp.length?recentExp.map(e=>{return`<div style="display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--g1);gap:10px"><span style="font-size:1.2rem">🧾</span><div style="flex:1"><div style="font-size:.83rem;font-weight:700">${e.desc||'—'}</div><div style="font-size:.72rem;color:var(--g4)">${e.date?new Date(e.date).toLocaleDateString('ar-SA'):''}</div></div><b style="color:var(--err)">${(parseFloat(e.amount)||0).toLocaleString()} ر</b></div>`;}).join(''):'<div class="empty" style="padding:20px"><div class="et">لا توجد مصاريف</div></div>'}</div></div>
+      <div class="wg"><div class="wg-h"><h3>🧾 آخر المصاريف</h3></div><div class="wg-b p0">${recentExp.length?recentExp.map(e=>{return`<div style="display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--g1);gap:10px"><span style="font-size:1.2rem">🧾</span><div style="flex:1"><div style="font-size:.83rem;font-weight:700">${e.desc||'—'}</div><div style="font-size:.72rem;color:var(--g4)">${e.date?fmtDate(e.date):''}</div></div><b style="color:var(--err)">${(parseFloat(e.amount)||0).toLocaleString()} ر</b></div>`;}).join(''):'<div class="empty" style="padding:20px"><div class="et">لا توجد مصاريف</div></div>'}</div></div>
       <div class="wg"><div class="wg-h"><h3>📊 هذا الشهر</h3></div><div class="wg-b"><div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:.85rem"><span>الإيرادات</span><b style="color:var(--ok)">${monthPay.toLocaleString()} ر</b></div><div style="display:flex;justify-content:space-between;font-size:.85rem"><span>المصاريف</span><b style="color:var(--err)">${monthExp.toLocaleString()} ر</b></div><hr style="margin:10px 0;border-color:var(--g2)"><div style="display:flex;justify-content:space-between;font-size:.9rem;font-weight:700"><span>الصافي</span><b style="color:${(monthPay-monthExp)>=0?'var(--ok)':'var(--err)'}">${(monthPay-monthExp).toLocaleString()} ر</b></div></div></div>
     </div>
   </div>`;
@@ -4750,11 +4752,11 @@ function renderFinance(){
     </div>
     <div class="g2">
       <div>
-        <div class="wg"><div class="wg-h"><h3>💵 آخر المدفوعات</h3><button class="btn btn-g btn-sm" onclick="finTab('payments',document.querySelector('#v-finance .tabs .tab:nth-child(3)'))">عرض الكل</button></div><div class="wg-b p0">${recentPay.length?recentPay.map(p=>{const k=STUDENTS.find(x=>x.id===p.stuId);return`<div style="display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--g1);gap:10px"><span style="font-size:1.2rem">💵</span><div style="flex:1"><div style="font-size:.83rem;font-weight:700">${k?.name||p.stuId||'—'}</div><div style="font-size:.72rem;color:var(--g4)">${p.date?new Date(p.date).toLocaleDateString('ar-SA'):''} · ${p.method||''}</div></div><b style="color:var(--ok)">${(parseFloat(p.amount)||0).toLocaleString()} ر</b></div>`;}).join(''):'<div class="empty" style="padding:20px"><div class="et">لا توجد مدفوعات بعد</div></div>'}</div></div>
+        <div class="wg"><div class="wg-h"><h3>💵 آخر المدفوعات</h3><button class="btn btn-g btn-sm" onclick="finTab('payments',document.querySelector('#v-finance .tabs .tab:nth-child(3)'))">عرض الكل</button></div><div class="wg-b p0">${recentPay.length?recentPay.map(p=>{const k=STUDENTS.find(x=>x.id===p.stuId);return`<div style="display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--g1);gap:10px"><span style="font-size:1.2rem">💵</span><div style="flex:1"><div style="font-size:.83rem;font-weight:700">${k?.name||p.stuId||'—'}</div><div style="font-size:.72rem;color:var(--g4)">${p.date?fmtDate(p.date):''} · ${p.method||''}</div></div><b style="color:var(--ok)">${(parseFloat(p.amount)||0).toLocaleString()} ر</b></div>`;}).join(''):'<div class="empty" style="padding:20px"><div class="et">لا توجد مدفوعات بعد</div></div>'}</div></div>
         <div class="wg"><div class="wg-h"><h3>⚠️ رسوم غير مدفوعة</h3></div><div class="wg-b p0">${unpaidFees.length?unpaidFees.map(f=>{const k=STUDENTS.find(x=>x.id===f.stuId);return`<div style="display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--g1);gap:10px"><span style="font-size:1.2rem">⚠️</span><div style="flex:1"><div style="font-size:.83rem;font-weight:700">${k?.name||'—'}</div><div style="font-size:.72rem;color:var(--g4)">${f.period||f.type||''} · استحقاق ${f.due||'—'}</div></div><b style="color:var(--err)">${(parseFloat(f.amount)||0).toLocaleString()} ر</b></div>`;}).join(''):'<div class="empty" style="padding:20px"><div class="et">لا توجد رسوم معلقة 🎉</div></div>'}</div></div>
       </div>
       <div>
-        <div class="wg"><div class="wg-h"><h3>🧾 آخر المصاريف</h3><button class="btn btn-g btn-sm" onclick="finTab('expenses',document.querySelector('#v-finance .tabs .tab:nth-child(4)'))">عرض الكل</button></div><div class="wg-b p0">${recentExp.length?recentExp.map(e=>{const catMap={salary:'💼 رواتب',rent:'🏢 إيجار',utilities:'💡 خدمات',supplies:'📦 مستلزمات',maintenance:'🔧 صيانة',training:'🎓 تدريب',other:'📌 أخرى'};return`<div style="display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--g1);gap:10px"><span style="font-size:1.2rem">🧾</span><div style="flex:1"><div style="font-size:.83rem;font-weight:700">${e.desc||'—'}</div><div style="font-size:.72rem;color:var(--g4)">${catMap[e.cat]||e.cat||''} · ${e.date?new Date(e.date).toLocaleDateString('ar-SA'):''}</div></div><b style="color:var(--err)">${(parseFloat(e.amount)||0).toLocaleString()} ر</b></div>`;}).join(''):'<div class="empty" style="padding:20px"><div class="et">لا توجد مصاريف مسجلة</div></div>'}</div></div>
+        <div class="wg"><div class="wg-h"><h3>🧾 آخر المصاريف</h3><button class="btn btn-g btn-sm" onclick="finTab('expenses',document.querySelector('#v-finance .tabs .tab:nth-child(4)'))">عرض الكل</button></div><div class="wg-b p0">${recentExp.length?recentExp.map(e=>{const catMap={salary:'💼 رواتب',rent:'🏢 إيجار',utilities:'💡 خدمات',supplies:'📦 مستلزمات',maintenance:'🔧 صيانة',training:'🎓 تدريب',other:'📌 أخرى'};return`<div style="display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--g1);gap:10px"><span style="font-size:1.2rem">🧾</span><div style="flex:1"><div style="font-size:.83rem;font-weight:700">${e.desc||'—'}</div><div style="font-size:.72rem;color:var(--g4)">${catMap[e.cat]||e.cat||''} · ${e.date?fmtDate(e.date):''}</div></div><b style="color:var(--err)">${(parseFloat(e.amount)||0).toLocaleString()} ر</b></div>`;}).join(''):'<div class="empty" style="padding:20px"><div class="et">لا توجد مصاريف مسجلة</div></div>'}</div></div>
         <div class="wg"><div class="wg-h"><h3>📊 توزيع المصاريف</h3></div><div class="wg-b">${renderExpPie()}</div></div>
       </div>
     </div>`;
@@ -4773,12 +4775,12 @@ function renderFinance(){
     },10);
   } else if(finTabVal==='payments'){
     const list=[...PAYMENTS].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-    w.innerHTML=list.length?list.map(p=>{const k=STUDENTS.find(x=>x.id===p.stuId);return`<div class="card"><div class="av green" style="font-size:1.3rem">💵</div><div class="ci"><div class="cn">${k?.name||'—'}</div><div class="cm">${p.date?new Date(p.date).toLocaleDateString('ar-SA'):''} · ${p.method||''} · ${p.desc||''}</div>${p.ref?`<div class="cm">رقم: ${p.ref}</div>`:''}</div><b style="color:var(--ok);font-size:1rem">${(parseFloat(p.amount)||0).toLocaleString()} ر</b><div class="c-acts"><button class="btn btn-d btn-xs" onclick="delPayment('${p.id}')">🗑️</button></div></div>`;}).join(''):
+    w.innerHTML=list.length?list.map(p=>{const k=STUDENTS.find(x=>x.id===p.stuId);return`<div class="card"><div class="av green" style="font-size:1.3rem">💵</div><div class="ci"><div class="cn">${k?.name||'—'}</div><div class="cm">${p.date?fmtDate(p.date):''} · ${p.method||''} · ${p.desc||''}</div>${p.ref?`<div class="cm">رقم: ${p.ref}</div>`:''}</div><b style="color:var(--ok);font-size:1rem">${(parseFloat(p.amount)||0).toLocaleString()} ر</b><div class="c-acts"><button class="btn btn-d btn-xs" onclick="delPayment('${p.id}')">🗑️</button></div></div>`;}).join(''):
     `<div class="empty"><div class="ei">💵</div><div class="et">لا توجد مدفوعات بعد</div></div>`;
   } else {
     const catMap={salary:'💼 رواتب',rent:'🏢 إيجار',utilities:'💡 خدمات',supplies:'📦 مستلزمات',maintenance:'🔧 صيانة',training:'🎓 تدريب',other:'📌 أخرى'};
     const list=[...EXPENSES].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-    w.innerHTML=list.length?list.map(e=>`<div class="card"><div class="av orange" style="font-size:1.3rem">🧾</div><div class="ci"><div class="cn">${e.desc||'—'}</div><div class="cm">${catMap[e.cat]||e.cat||''} · ${e.date?new Date(e.date).toLocaleDateString('ar-SA'):''}</div>${e.notes?`<div class="cm">${e.notes}</div>`:''}</div><b style="color:var(--err);font-size:1rem">${(parseFloat(e.amount)||0).toLocaleString()} ر</b><div class="c-acts"><button class="btn btn-g btn-xs" onclick="editExpense('${e.id}')">✏️</button><button class="btn btn-d btn-xs" onclick="delExpense('${e.id}')">🗑️</button></div></div>`).join(''):
+    w.innerHTML=list.length?list.map(e=>`<div class="card"><div class="av orange" style="font-size:1.3rem">🧾</div><div class="ci"><div class="cn">${e.desc||'—'}</div><div class="cm">${catMap[e.cat]||e.cat||''} · ${e.date?fmtDate(e.date):''}</div>${e.notes?`<div class="cm">${e.notes}</div>`:''}</div><b style="color:var(--err);font-size:1rem">${(parseFloat(e.amount)||0).toLocaleString()} ر</b><div class="c-acts"><button class="btn btn-g btn-xs" onclick="editExpense('${e.id}')">✏️</button><button class="btn btn-d btn-xs" onclick="delExpense('${e.id}')">🗑️</button></div></div>`).join(''):
     `<div class="empty"><div class="ei">🧾</div><div class="et">لا توجد مصاريف مسجلة</div></div>`;
   }
 }
@@ -4996,7 +4998,7 @@ function renderReports(){
       </div>
       <div>
         <div class="wg"><div class="wg-h"><h3>👦 الطلاب الجدد (${yStu.length})</h3></div><div class="wg-b p0">
-          ${yStu.slice(0,8).map(s=>`<div style="display:flex;align-items:center;padding:8px 14px;border-bottom:1px solid var(--g1);gap:10px"><div class="av purple" style="width:30px;height:30px;border-radius:7px;font-size:.75rem">${(s.name||'?').slice(0,2)}</div><div style="flex:1"><div style="font-size:.83rem;font-weight:700">${s.name}</div><div style="font-size:.72rem;color:var(--g4)">${s.joinDate?new Date(s.joinDate).toLocaleDateString('ar-SA'):''}</div></div></div>`).join('')||'<div class="empty" style="padding:16px"><div class="et">لا طلاب جدد في ${selY}</div></div>'}
+          ${yStu.slice(0,8).map(s=>`<div style="display:flex;align-items:center;padding:8px 14px;border-bottom:1px solid var(--g1);gap:10px"><div class="av purple" style="width:30px;height:30px;border-radius:7px;font-size:.75rem">${(s.name||'?').slice(0,2)}</div><div style="flex:1"><div style="font-size:.83rem;font-weight:700">${s.name}</div><div style="font-size:.72rem;color:var(--g4)">${s.joinDate?fmtDate(s.joinDate):''}</div></div></div>`).join('')||'<div class="empty" style="padding:16px"><div class="et">لا طلاب جدد في ${selY}</div></div>'}
           ${yStu.length>8?`<div style="text-align:center;padding:8px;font-size:.78rem;color:var(--g4)">... و ${yStu.length-8} آخرون</div>`:''}
         </div></div>
         <div class="wg"><div class="wg-h"><h3>🤝 الشراكات (${yPart.length}) | 🎪 الفعاليات (${yProg.length})</h3></div><div class="wg-b">
@@ -5257,7 +5259,7 @@ function showVolDet(id){
   const v=VOLUNTEERS.find(x=>x.id===id);if(!v)return;
   const hrs=VOL_HOURS.filter(h=>h.volId===id).reduce((s,h)=>s+(parseFloat(h.hours)||0),0);
   const typeMap={volunteer:'متطوع',assistant:'مساعد مدرس',intern:'متدرب',parttime:'دوام جزئي مدفوع'};
-  const html=`<div class="mbg" id="vol-det-modal" style="display:flex;align-items:center;justify-content:center;padding:16px;z-index:600"><div class="mb mb-large" style="padding:0;overflow:hidden;border-radius:16px"><div class="fhd" style="padding:14px 20px;border-radius:0"><h2>👤 ${v.name}</h2></div><div style="padding:18px 20px"><div style="display:flex;gap:14px;align-items:center;margin-bottom:14px"><div style="width:70px;height:70px;border-radius:50%;overflow:hidden;border:3px solid var(--pr);flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--pr-l);font-size:1.5rem;font-weight:900;color:var(--pr)">${v.photo?`<img src="${v.photo}" style="width:100%;height:100%;object-fit:cover">`:(v.name||'?').slice(0,2)}</div><div><div style="font-weight:900;font-size:1rem">${v.name}</div><div style="font-size:.8rem;color:var(--g5)">${typeMap[v.type]||''} · ${v.skill||'—'}</div><div style="font-size:.8rem;color:var(--g5)">${v.phone||'—'}</div></div></div><div class="info-grid"><div class="ic"><h4>بيانات التطوع</h4><div class="ir"><span class="il">النوع:</span><span class="iv">${typeMap[v.type]||'—'}</span></div><div class="ir"><span class="il">الانضمام:</span><span class="iv">${v.joinDate?new Date(v.joinDate).toLocaleDateString('ar-SA'):'—'}</span></div><div class="ir"><span class="il">الساعات:</span><span class="iv" style="color:var(--ok)">${hrs} ساعة</span></div>${v.salary?`<div class="ir"><span class="il">المبلغ:</span><span class="iv" style="color:var(--pr)">${parseFloat(v.salary).toLocaleString()} ر/شهر</span></div>`:''}</div><div class="ic"><h4>المؤهل</h4><div class="ir"><span class="il">الدراسة:</span><span class="iv">${v.edu||'—'}</span></div><div class="ir"><span class="il">التخصص:</span><span class="iv">${v.major||'—'}</span></div></div></div>${(v.idCard||v.cert||v.doc)?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">${v.idCard?`<a href="${v.idCard}" target="_blank" class="btn btn-g btn-sm">🪪 الهوية</a>`:''}${v.cert?`<a href="${v.cert}" target="_blank" class="btn btn-g btn-sm">🎓 الشهادة</a>`:''}${v.doc?`<a href="${v.doc}" target="_blank" class="btn btn-g btn-sm">📎 وثيقة</a>`:''}</div>`:''}</div><div class="fa"><button class="btn btn-g" onclick="document.getElementById('vol-det-modal').remove()">إغلاق</button></div></div></div>`;
+  const html=`<div class="mbg" id="vol-det-modal" style="display:flex;align-items:center;justify-content:center;padding:16px;z-index:600"><div class="mb mb-large" style="padding:0;overflow:hidden;border-radius:16px"><div class="fhd" style="padding:14px 20px;border-radius:0"><h2>👤 ${v.name}</h2></div><div style="padding:18px 20px"><div style="display:flex;gap:14px;align-items:center;margin-bottom:14px"><div style="width:70px;height:70px;border-radius:50%;overflow:hidden;border:3px solid var(--pr);flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--pr-l);font-size:1.5rem;font-weight:900;color:var(--pr)">${v.photo?`<img src="${v.photo}" style="width:100%;height:100%;object-fit:cover">`:(v.name||'?').slice(0,2)}</div><div><div style="font-weight:900;font-size:1rem">${v.name}</div><div style="font-size:.8rem;color:var(--g5)">${typeMap[v.type]||''} · ${v.skill||'—'}</div><div style="font-size:.8rem;color:var(--g5)">${v.phone||'—'}</div></div></div><div class="info-grid"><div class="ic"><h4>بيانات التطوع</h4><div class="ir"><span class="il">النوع:</span><span class="iv">${typeMap[v.type]||'—'}</span></div><div class="ir"><span class="il">الانضمام:</span><span class="iv">${v.joinDate?fmtDate(v.joinDate):'—'}</span></div><div class="ir"><span class="il">الساعات:</span><span class="iv" style="color:var(--ok)">${hrs} ساعة</span></div>${v.salary?`<div class="ir"><span class="il">المبلغ:</span><span class="iv" style="color:var(--pr)">${parseFloat(v.salary).toLocaleString()} ر/شهر</span></div>`:''}</div><div class="ic"><h4>المؤهل</h4><div class="ir"><span class="il">الدراسة:</span><span class="iv">${v.edu||'—'}</span></div><div class="ir"><span class="il">التخصص:</span><span class="iv">${v.major||'—'}</span></div></div></div>${(v.idCard||v.cert||v.doc)?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">${v.idCard?`<a href="${v.idCard}" target="_blank" class="btn btn-g btn-sm">🪪 الهوية</a>`:''}${v.cert?`<a href="${v.cert}" target="_blank" class="btn btn-g btn-sm">🎓 الشهادة</a>`:''}${v.doc?`<a href="${v.doc}" target="_blank" class="btn btn-g btn-sm">📎 وثيقة</a>`:''}</div>`:''}</div><div class="fa"><button class="btn btn-g" onclick="document.getElementById('vol-det-modal').remove()">إغلاق</button></div></div></div>`;
   document.getElementById('vol-det-modal')?.remove();const tmp=document.createElement('div');tmp.innerHTML=html;document.body.appendChild(tmp.firstChild);
 }
 function openVolForm(){
@@ -5302,7 +5304,7 @@ function renderNotifs(){
     const diff=Math.round((next-today)/864e5);
     if(diff<=7){
       const isEmp=EMPS.find(e=>e.id===x.id);
-      notifs.push({type:'birthday',icon:'🎂',title:(diff===0?'🎉 عيد ميلاد اليوم!':diff===1?'غداً عيد ميلاد':'عيد ميلاد خلال '+diff+' أيام'),body:(x.name||x.nm||'—')+' · '+(isEmp?'موظف':'طالب'),urgency:diff===0?'err':diff<=3?'warn':'bl',date:next.toLocaleDateString('ar-SA')});
+      notifs.push({type:'birthday',icon:'🎂',title:(diff===0?'🎉 عيد ميلاد اليوم!':diff===1?'غداً عيد ميلاد':'عيد ميلاد خلال '+diff+' أيام'),body:(x.name||x.nm||'—')+' · '+(isEmp?'موظف':'طالب'),urgency:diff===0?'err':diff<=3?'warn':'bl',date:next.toLocaleDateString('ar')});
     }
   });
 
@@ -5408,7 +5410,7 @@ function renderDocs(){
       <div class="av cyan" style="font-size:1.5rem">📄</div>
       <div class="ci">
         <div class="cn">${d.name}</div>
-        <div class="cm">${typeMap[d.type]||'—'} · ${d.org||'—'} · ${d.date?new Date(d.date).toLocaleDateString('ar-SA'):''}</div>
+        <div class="cm">${typeMap[d.type]||'—'} · ${d.org||'—'} · ${d.date?fmtDate(d.date):''}</div>
         ${d.notes?`<div class="cm" style="margin-top:2px">${d.notes}</div>`:''}
       </div>
       <div class="c-badges">
@@ -5444,7 +5446,7 @@ function saveDoc(){
     DOCS.unshift({...data,id:docId});
     // ── تلقائياً: أضف تنبيهاً في لوحة التحكم ──
     loadManualNotifs();
-    MANUAL_NOTIFS.unshift({id:'doc_'+docId,icon:'📄',title:(typeMap[docType]||'وثيقة')+': '+name,body:(data.org?data.org+' · ':'')+new Date().toLocaleDateString('ar-SA'),urgency:'bl',date:data.date||todayStr(),docId,isDoc:true});
+    MANUAL_NOTIFS.unshift({id:'doc_'+docId,icon:'📄',title:(typeMap[docType]||'وثيقة')+': '+name,body:(data.org?data.org+' · ':'')+new Date().toLocaleDateString('ar'),urgency:'bl',date:data.date||todayStr(),docId,isDoc:true});
     saveManualNotifs();
     toast('✅ تم إضافة الوثيقة وإرسال إشعار','ok');
   }
@@ -5576,7 +5578,7 @@ function renderDashNotifs(){
   if(canSeeHrNotifs()){
     EMPS.filter(e=>e.contractEnd).forEach(e=>{
       const diff=Math.round((new Date(e.contractEnd)-today)/864e5);
-      if(diff>=0&&diff<=30)notifs.push({icon:'📃',title:'عقد ينتهي'+(diff===0?' اليوم!':diff<=7?' خلال '+diff+' أيام':' هذا الشهر'),body:e.name+' · '+new Date(e.contractEnd).toLocaleDateString('ar-SA'),urgency:diff<=7?'err':'warn'});
+      if(diff>=0&&diff<=30)notifs.push({icon:'📃',title:'عقد ينتهي'+(diff===0?' اليوم!':diff<=7?' خلال '+diff+' أيام':' هذا الشهر'),body:e.name+' · '+fmtDate(e.contractEnd),urgency:diff<=7?'err':'warn'});
     });
   }
 
@@ -5589,7 +5591,7 @@ function renderDashNotifs(){
     const diff=Math.round((next-today)/864e5);
     if(diff<=7){
       const isEmp=!!EMPS.find(e=>e.id===x.id);
-      notifs.push({icon:'🎂',title:diff===0?'🎉 عيد ميلاد اليوم!':diff===1?'غداً عيد ميلاد 🎂':'عيد ميلاد خلال '+diff+' أيام',body:(x.name||'—')+' · '+(isEmp?'موظف':'طالب'),urgency:diff===0?'err':diff<=3?'warn':'bl',date:next.toLocaleDateString('ar-SA')});
+      notifs.push({icon:'🎂',title:diff===0?'🎉 عيد ميلاد اليوم!':diff===1?'غداً عيد ميلاد 🎂':'عيد ميلاد خلال '+diff+' أيام',body:(x.name||'—')+' · '+(isEmp?'موظف':'طالب'),urgency:diff===0?'err':diff<=3?'warn':'bl',date:next.toLocaleDateString('ar')});
     }
   });
 
@@ -5662,7 +5664,7 @@ function saveCustomNotif(){
   const body=document.getElementById('cn-body')?.value.trim()||'';
   const urgency=document.getElementById('cn-urg')?.value||'warn';
   const repeat=document.getElementById('cn-repeat')?.value||'once';
-  const dateLabel=date?new Date(date).toLocaleDateString('ar-SA')+(time?' · '+time:''):'';
+  const dateLabel=date?fmtDate(date)+(time?' · '+time:''):'';
   MANUAL_NOTIFS.unshift({id:Date.now().toString(36)+Math.random().toString(36).slice(2),title,body,urgency,date:dateLabel,eventDate:date,time,repeat,manual:true});
   saveManualNotifs();
   document.getElementById('custom-notif-modal')?.remove();
@@ -5782,7 +5784,7 @@ function renderCenterFinance(t){
     const sf=(document.getElementById('cfe-sf')||{value:''}).value;
     const fl=list.filter(f=>{const k=STUDENTS.find(x=>x.id===f.stuId);return(!q||(k?.name||'').toLowerCase().includes(q))&&(!sf||f.status===sf);});
     const cl=document.getElementById('cfe-list');if(!cl)return;
-    cl.innerHTML=fl.length?fl.map(f=>{const k=STUDENTS.find(x=>x.id===f.stuId);const sm=stMap[f.status]||{cls:'b-gy',tx:'—'};return`<div class="card"><div class="av orange" style="font-size:1.3rem">📋</div><div class="ci"><div class="cn">${k?.name||'—'}</div><div class="cm">${f.type||'رسوم'} · ${f.period||''} · استحقاق ${f.due?new Date(f.due).toLocaleDateString('ar-SA'):'—'}</div></div><b style="font-size:1rem;color:var(--pr)">${(parseFloat(f.amount)||0).toLocaleString()} ر</b><span class="bdg ${sm.cls}">${sm.tx}</span><div class="c-acts"><button class="btn btn-g btn-xs" onclick="editFee('${f.id}')">✏️</button><button class="btn btn-d btn-xs" onclick="delFee('${f.id}');renderCenterFinance('fees')">🗑️</button></div></div>`;}).join(''):'<div class="empty"><div class="ei">📋</div><div class="et">لا توجد رسوم — اضغط "رسوم جديدة"</div></div>';
+    cl.innerHTML=fl.length?fl.map(f=>{const k=STUDENTS.find(x=>x.id===f.stuId);const sm=stMap[f.status]||{cls:'b-gy',tx:'—'};return`<div class="card"><div class="av orange" style="font-size:1.3rem">📋</div><div class="ci"><div class="cn">${k?.name||'—'}</div><div class="cm">${f.type||'رسوم'} · ${f.period||''} · استحقاق ${f.due?fmtDate(f.due):'—'}</div></div><b style="font-size:1rem;color:var(--pr)">${(parseFloat(f.amount)||0).toLocaleString()} ر</b><span class="bdg ${sm.cls}">${sm.tx}</span><div class="c-acts"><button class="btn btn-g btn-xs" onclick="editFee('${f.id}')">✏️</button><button class="btn btn-d btn-xs" onclick="delFee('${f.id}');renderCenterFinance('fees')">🗑️</button></div></div>`;}).join(''):'<div class="empty"><div class="ei">📋</div><div class="et">لا توجد رسوم — اضغط "رسوم جديدة"</div></div>';
     return;
   }
   // ── PAYMENTS ──
@@ -5792,7 +5794,7 @@ function renderCenterFinance(t){
     const q=(document.getElementById('cpay-q')||{value:''}).value.toLowerCase();
     const fl=list.filter(p=>{const k=STUDENTS.find(x=>x.id===p.stuId);return!q||(k?.name||'').toLowerCase().includes(q)||String(p.amount).includes(q);});
     const cl=document.getElementById('cpay-list');if(!cl)return;
-    cl.innerHTML=fl.length?fl.map(p=>{const k=STUDENTS.find(x=>x.id===p.stuId);const mMap={cash:'نقداً',transfer:'تحويل',card:'بطاقة',cheque:'شيك'};return`<div class="card"><div class="av green" style="font-size:1.3rem">💵</div><div class="ci"><div class="cn">${k?.name||'—'}</div><div class="cm">${p.date?new Date(p.date).toLocaleDateString('ar-SA'):''} · ${mMap[p.method]||p.method||'—'}${p.ref?' · '+p.ref:''}</div>${p.desc?`<div class="cm">${p.desc}</div>`:''}</div><b style="font-size:1rem;color:var(--ok)">${(parseFloat(p.amount)||0).toLocaleString()} ر</b><div class="c-acts"><button class="btn btn-d btn-xs" onclick="delPayment('${p.id}');renderCenterFinance('payments')">🗑️</button></div></div>`;}).join(''):'<div class="empty"><div class="ei">💵</div><div class="et">لا توجد مدفوعات — اضغط "تسجيل دفعة"</div></div>';
+    cl.innerHTML=fl.length?fl.map(p=>{const k=STUDENTS.find(x=>x.id===p.stuId);const mMap={cash:'نقداً',transfer:'تحويل',card:'بطاقة',cheque:'شيك'};return`<div class="card"><div class="av green" style="font-size:1.3rem">💵</div><div class="ci"><div class="cn">${k?.name||'—'}</div><div class="cm">${p.date?fmtDate(p.date):''} · ${mMap[p.method]||p.method||'—'}${p.ref?' · '+p.ref:''}</div>${p.desc?`<div class="cm">${p.desc}</div>`:''}</div><b style="font-size:1rem;color:var(--ok)">${(parseFloat(p.amount)||0).toLocaleString()} ر</b><div class="c-acts"><button class="btn btn-d btn-xs" onclick="delPayment('${p.id}');renderCenterFinance('payments')">🗑️</button></div></div>`;}).join(''):'<div class="empty"><div class="ei">💵</div><div class="et">لا توجد مدفوعات — اضغط "تسجيل دفعة"</div></div>';
     return;
   }
   // ── EXPENSES ──
@@ -5804,7 +5806,7 @@ function renderCenterFinance(t){
     const cat=(document.getElementById('cexp-cat')||{value:''}).value;
     const fl=list.filter(e=>(!q||(e.desc||'').toLowerCase().includes(q))&&(!cat||e.cat===cat));
     const cl=document.getElementById('cexp-list');if(!cl)return;
-    cl.innerHTML=fl.length?fl.map(e=>`<div class="card"><div class="av red" style="font-size:1.3rem">🧾</div><div class="ci"><div class="cn">${e.desc||'—'}</div><div class="cm">${catMap[e.cat]||'—'} · ${e.date?new Date(e.date).toLocaleDateString('ar-SA'):''}</div>${e.notes?`<div class="cm">${e.notes}</div>`:''}</div><b style="font-size:1rem;color:var(--err)">${(parseFloat(e.amount)||0).toLocaleString()} ر</b><div class="c-acts"><button class="btn btn-g btn-xs" onclick="editExpense('${e.id}')">✏️</button><button class="btn btn-d btn-xs" onclick="delExpense('${e.id}');renderCenterFinance('expenses')">🗑️</button></div></div>`).join(''):'<div class="empty"><div class="ei">🧾</div><div class="et">لا توجد مصاريف — اضغط "مصروف جديد"</div></div>';
+    cl.innerHTML=fl.length?fl.map(e=>`<div class="card"><div class="av red" style="font-size:1.3rem">🧾</div><div class="ci"><div class="cn">${e.desc||'—'}</div><div class="cm">${catMap[e.cat]||'—'} · ${e.date?fmtDate(e.date):''}</div>${e.notes?`<div class="cm">${e.notes}</div>`:''}</div><b style="font-size:1rem;color:var(--err)">${(parseFloat(e.amount)||0).toLocaleString()} ر</b><div class="c-acts"><button class="btn btn-g btn-xs" onclick="editExpense('${e.id}')">✏️</button><button class="btn btn-d btn-xs" onclick="delExpense('${e.id}');renderCenterFinance('expenses')">🗑️</button></div></div>`).join(''):'<div class="empty"><div class="ei">🧾</div><div class="et">لا توجد مصاريف — اضغط "مصروف جديد"</div></div>';
     return;
   }
 }
@@ -5819,7 +5821,7 @@ function filterCenterDocs(type,el){
   w.innerHTML=list.length?list.map(d=>`
     <div class="card">
       <div class="av cyan" style="font-size:1.5rem">📄</div>
-      <div class="ci"><div class="cn">${d.name}</div><div class="cm">${typeMap[d.type]||'—'} · ${d.org||'—'} · ${d.date?new Date(d.date).toLocaleDateString('ar-SA'):''}</div>${d.notes?`<div class="cm">${d.notes}</div>`:''}</div>
+      <div class="ci"><div class="cn">${d.name}</div><div class="cm">${typeMap[d.type]||'—'} · ${d.org||'—'} · ${d.date?fmtDate(d.date):''}</div>${d.notes?`<div class="cm">${d.notes}</div>`:''}</div>
       <div class="c-badges"><span class="bdg b-cy">${typeMap[d.type]||'—'}</span>${d.fileData?'<span class="bdg b-gr">📎</span>':''}</div>
       <div class="c-acts">${d.fileData?`<button class="btn btn-s btn-xs" onclick="downloadDoc('${d.id}')">⬇️</button>`:''}<button class="btn btn-g btn-xs" onclick="editDoc('${d.id}')">✏️</button><button class="btn btn-d btn-xs" onclick="deleteDoc('${d.id}')">🗑️</button></div>
     </div>`).join(''):'<div class="empty"><div class="ei">📄</div><div class="et">لا توجد وثيقةات</div></div>';
@@ -6123,7 +6125,7 @@ function renderCalendar(){
   endDate.setDate(calStartDate.getDate()+6);
 
   // تسمية الفترة
-  const fmt = d => d.toLocaleDateString('ar-SA',{day:'numeric',month:'short'});
+  const fmt = d => d.toLocaleDateString('ar',{day:'numeric',month:'short'});
   if(lbl) lbl.textContent = fmt(calStartDate)+' — '+fmt(endDate);
 
   const today = todayStr();
@@ -6240,7 +6242,7 @@ function calShowDayDetail(dateStr, allEvents){
   det.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
       <h3 style="font-size:.95rem;font-weight:900">
-        📆 ${dayNames[d.getDay()]} ${d.toLocaleDateString('ar-SA',{day:'numeric',month:'long',year:'numeric'})}
+        📆 ${dayNames[d.getDay()]} ${d.toLocaleDateString('ar',{day:'numeric',month:'long',year:'numeric'})}
         <span class="bdg b-bl" style="margin-right:6px">${dayEvents.length} حدث</span>
       </h3>
       <button class="btn btn-g btn-xs" onclick="document.getElementById('cal-day-detail').style.display='none';calSelectedDay=null">✕</button>
@@ -6619,7 +6621,7 @@ function viewDocFromNotif(docId){
     <div class="mb mb-large" style="max-width:580px;width:100%;padding:0;overflow:hidden;border-radius:16px">
       <div class="fhd" style="padding:14px 20px;border-radius:0">
         <h2>📄 ${d.name}</h2>
-        <p style="opacity:.8;font-size:.8rem">${typeMap[d.type]||'وثيقة'} · ${d.org||''} · ${d.date?new Date(d.date).toLocaleDateString('ar-SA'):''}</p>
+        <p style="opacity:.8;font-size:.8rem">${typeMap[d.type]||'وثيقة'} · ${d.org||''} · ${d.date?fmtDate(d.date):''}</p>
       </div>
       <div style="padding:18px 20px">
         ${d.notes?`<div style="background:var(--g0);border-radius:10px;padding:12px 16px;margin-bottom:12px;font-size:.88rem;line-height:1.8;border:1px solid var(--border-color)">${d.notes}</div>`:''}
@@ -6677,7 +6679,7 @@ function renderStuOnlineTab(){
         <div class="ci">
           <div class="cn">${s.name}${isOnlineOnly?' <span class="bdg b-cy" style="font-size:.62rem">أونلاين فقط</span>':' <span class="bdg b-bl" style="font-size:.62rem">متعدد البرامج</span>'}</div>
           <div class="cm">${s.diag||'—'} · ${spec?.name||'—'}</div>
-          ${lastSess?`<div class="cm">آخر جلسة: ${new Date(lastSess.date).toLocaleDateString('ar-SA')}</div>`:''}
+          ${lastSess?`<div class="cm">آخر جلسة: ${fmtDate(lastSess.date)}</div>`:''}
         </div>
         <div class="c-badges">
           <span class="bdg b-cy">${stuSess.length} جلسة</span>
@@ -6743,7 +6745,7 @@ function openOnlineDetModal(stuId){
     ?stuSess.map(o=>{const sm=stM[o.status]||{cls:'b-gy',tx:'—'};return`
       <div style="display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--border-color);gap:10px">
         <div style="flex:1">
-          <div style="font-size:.84rem;font-weight:700">${o.type||'جلسة'} · ${o.date?new Date(o.date).toLocaleDateString('ar-SA'):''} ${o.time?'· '+o.time:''}</div>
+          <div style="font-size:.84rem;font-weight:700">${o.type||'جلسة'} · ${o.date?fmtDate(o.date):''} ${o.time?'· '+o.time:''}</div>
           ${o.link?`<a href="${o.link}" target="_blank" style="font-size:.72rem;color:var(--pr)">🔗 رابط الاجتماع</a>`:''}
           ${o.goal?`<div style="font-size:.72rem;color:var(--g5)">${o.goal}</div>`:''}
         </div>
@@ -6756,7 +6758,7 @@ function openOnlineDetModal(stuId){
   document.getElementById('online-det-appt-list').innerHTML=stuAppts.length
     ?stuAppts.map(a=>{const am=aM[a.status]||{cls:'b-gy',tx:'—'};return`
       <div style="display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--border-color);gap:10px">
-        <div style="flex:1"><div style="font-size:.84rem;font-weight:700">${a.type||'موعد'} · ${a.date?new Date(a.date).toLocaleDateString('ar-SA'):''} ${a.time?'· '+a.time:''}</div></div>
+        <div style="flex:1"><div style="font-size:.84rem;font-weight:700">${a.type||'موعد'} · ${a.date?fmtDate(a.date):''} ${a.time?'· '+a.time:''}</div></div>
         <span class="bdg ${am.cls}">${am.tx}</span>
       </div>`;}).join('')
     :'<div class="empty" style="padding:16px"><div class="et">لا توجد مواعيد بعد</div></div>';
@@ -6853,7 +6855,7 @@ function filterCenterVisits(t,el){
       <div class="av cyan" style="font-size:1.5rem">${typeIcon[v.type]||'🏛️'}</div>
       <div class="ci">
         <div class="cn">${typeMap[v.type]||'زيارة'}${v.name?` — <span style="font-weight:500;font-size:.9rem">${v.name}</span>`:''}</div>
-        <div class="cm">${v.date?new Date(v.date).toLocaleDateString('ar-SA','{year:\'numeric\',month:\'long\',day:\'numeric\'}'):''} ${v.count&&v.count>1?'· '+v.count+' زائرين':''}</div>
+        <div class="cm">${v.date?new Date(v.date).toLocaleDateString('ar','{year:\'numeric\',month:\'long\',day:\'numeric\'}'):''} ${v.count&&v.count>1?'· '+v.count+' زائرين':''}</div>
         ${v.notes?`<div class="cm" style="color:var(--g6)">${v.notes}</div>`:''}
       </div>
       <div class="c-badges"><span class="bdg b-cy">${typeMap[v.type]||'—'}</span></div>
@@ -7070,7 +7072,7 @@ function filterCenterDocs(t,el){
       <div class="av cyan" style="font-size:1.4rem">📄</div>
       <div class="ci">
         <div class="cn">${d.name}</div>
-        <div class="cm">${typeMap[d.type]||'—'} · ${d.org||'—'} · ${d.date?new Date(d.date).toLocaleDateString('ar-SA'):''}</div>
+        <div class="cm">${typeMap[d.type]||'—'} · ${d.org||'—'} · ${d.date?fmtDate(d.date):''}</div>
         ${d.notes?`<div class="cm">${d.notes}</div>`:''}
       </div>
       <div class="c-badges">
