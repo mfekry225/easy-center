@@ -1917,7 +1917,6 @@ body{font-family:'Tajawal',sans-serif;background:var(--g1);color:var(--g8);min-h
   <div class="ph">
     <div class="ph-t"><h2>💳 المالية والفواتير</h2><p>إدارة الرسوم والمدفوعات والفواتير</p></div>
     <div class="ph-a">
-      <button class="btn btn-g no-print" onclick="go('hr-salary')">💰 الرواتب</button>
       <button class="btn btn-p no-print" onclick="openFeeForm()">➕ رسوم جديدة</button>
       <button class="btn btn-g no-print" onclick="openPaymentForm()">💵 تسجيل دفعة</button>
       <button class="btn btn-g no-print" onclick="openExpenseForm()">🧾 مصروف</button>
@@ -5650,6 +5649,7 @@ function centerTab(t,el){
       content.innerHTML=`
         <div class="ph" style="padding:0 0 12px 0">
           <div class="ph-a" style="gap:8px">
+            <button class="btn btn-g btn-sm no-print" onclick="go('hr-salary')">💰 الرواتب</button>
             <button class="btn btn-p btn-sm no-print" onclick="openFeeForm()">➕ رسوم جديدة</button>
             <button class="btn btn-g btn-sm no-print" onclick="openPaymentForm()">💵 تسجيل دفعة</button>
             <button class="btn btn-g btn-sm no-print" onclick="openExpenseForm()">🧾 مصروف جديد</button>
