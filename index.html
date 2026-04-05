@@ -1079,7 +1079,7 @@ body{font-family:'Tajawal',sans-serif;background:var(--g1);color:var(--g8);min-h
       <button class="btn btn-g btn-sm" onclick="salaryNav(0)">الشهر الحالي</button>
       <button class="btn btn-g btn-sm" onclick="salaryNav(1)">← التالي</button>
       <button class="btn btn-s no-print" onclick="genAllSalaries()">⚡ توليد رواتب الشهر</button>
-      <button class="btn btn-g no-print" onclick="go('hr')">← رجوع</button>
+      <button class="btn btn-g no-print" onclick="go('center');setTimeout(()=>centerTab('finance',document.querySelector('#v-center .tab[onclick*=finance]')),50)">← رجوع</button>
     </div>
   </div>
   <div class="stats" style="grid-template-columns:repeat(3,1fr)">
@@ -1917,6 +1917,7 @@ body{font-family:'Tajawal',sans-serif;background:var(--g1);color:var(--g8);min-h
   <div class="ph">
     <div class="ph-t"><h2>💳 المالية والفواتير</h2><p>إدارة الرسوم والمدفوعات والفواتير</p></div>
     <div class="ph-a">
+      <button class="btn btn-g no-print" onclick="go('hr-salary')">💰 الرواتب</button>
       <button class="btn btn-p no-print" onclick="openFeeForm()">➕ رسوم جديدة</button>
       <button class="btn btn-g no-print" onclick="openPaymentForm()">💵 تسجيل دفعة</button>
       <button class="btn btn-g no-print" onclick="openExpenseForm()">🧾 مصروف</button>
@@ -3589,7 +3590,22 @@ function renderSalary(){
     const ded=Math.round(abs*(e.salary||0)/30);
     const net=sal?.net??(base-ded);
     const paid=sal?.paid||false;
-    return`<div class="salary-card"><div class="salary-hd"><div style="display:flex;align-items:center;gap:10px"><div class="av blue" style="width:38px;height:38px;border-radius:8px;font-size:.82rem">${(e.name||'?').slice(0,2)}</div><div><div style="font-weight:800">${e.name}</div><div style="font-size:.72rem;opacity:.7">${roleLabel(e.role)}</div></div></div><div style="text-align:left"><div style="font-size:1.1rem;font-weight:900">${net.toLocaleString()} ريال</div><span class="bdg ${paid?'b-gr':'b-yw'}" style="display:inline-flex;margin-top:4px">${paid?'✅ مُصرف':'⏳ لم يُصرف'}</span></div></div><div class="salary-body" style="display:grid;grid-template-columns:1fr 1fr;gap:4px"><div class="salary-row"><span>الأساسي</span><span>${(e.salary||0).toLocaleString()} ر</span></div><div class="salary-row plus"><span>البدلات</span><span>+${((e.housing||0)+(e.transport||0)).toLocaleString()} ر</span></div><div class="salary-row minus"><span>الاستقطاع (${abs} غياب)</span><span>-${ded.toLocaleString()} ر</span></div><div class="salary-row total"><span>الصافي</span><b>${net.toLocaleString()} ر</b></div></div><div style="padding:10px 16px;border-top:1px solid var(--g1);display:flex;gap:8px">${!paid?`<button class="btn btn-s btn-xs" onclick="markPaid('${e.id}','${mKey}',${net})">✅ تأكيد الصرف</button>`:''}</div></div>`;}).join('')||`<div class="empty"><div class="ei">💰</div><div class="et">لا يوجد موظفون</div></div>`;
+    const bonus=sal?.bonus||0; const deduct=sal?.deduct||0;
+    return`<div class="salary-card">
+      <div class="salary-hd"><div style="display:flex;align-items:center;gap:10px"><div class="av blue" style="width:38px;height:38px;border-radius:8px;font-size:.82rem">${(e.name||'?').slice(0,2)}</div><div><div style="font-weight:800">${e.name}</div><div style="font-size:.72rem;opacity:.7">${roleLabel(e.role)}</div></div></div><div style="text-align:left"><div style="font-size:1.1rem;font-weight:900">${net.toLocaleString()} ريال</div><span class="bdg ${paid?'b-gr':'b-yw'}" style="display:inline-flex;margin-top:4px">${paid?'✅ مُصرف':'⏳ لم يُصرف'}</span></div></div>
+      <div class="salary-body" style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+        <div class="salary-row"><span>الأساسي</span><span>${(e.salary||0).toLocaleString()} ر</span></div>
+        <div class="salary-row plus"><span>البدلات</span><span>+${((e.housing||0)+(e.transport||0)).toLocaleString()} ر</span></div>
+        ${bonus?`<div class="salary-row plus"><span>علاوة</span><span>+${bonus.toLocaleString()} ر</span></div>`:''}
+        ${deduct?`<div class="salary-row minus"><span>خصم إضافي</span><span>-${deduct.toLocaleString()} ر</span></div>`:''}
+        <div class="salary-row minus"><span>استقطاع (${abs} غياب)</span><span>-${ded.toLocaleString()} ر</span></div>
+        <div class="salary-row total"><span>الصافي</span><b>${net.toLocaleString()} ر</b></div>
+      </div>
+      <div style="padding:10px 16px;border-top:1px solid var(--g1);display:flex;gap:8px">
+        ${!paid?`<button class="btn btn-s btn-xs" onclick="markPaid('${e.id}','${mKey}',${net})">✅ تأكيد الصرف</button>`:''}
+        <button class="btn btn-g btn-xs" onclick="openSalaryAdj('${e.id}','${mKey}',${base},${ded},${paid})">✏️ علاوة / خصم</button>
+      </div>
+    </div>`;}).join('')||`<div class="empty"><div class="ei">💰</div><div class="et">لا يوجد موظفون</div></div>`;
 }
 function salaryNav(d){if(d===0){salMonth=new Date();}else{salMonth=new Date(salMonth.getFullYear(),salMonth.getMonth()+d,1);}renderSalary();}
 async function genAllSalaries(){
@@ -3599,9 +3615,53 @@ async function genAllSalaries(){
 }
 async function markPaid(empId,mKey,net){
   const sal=SALARIES.find(s=>s.empId===empId&&s.month===mKey);
-  const data={empId,month:mKey,net,paid:true,paidDate:todayStr()};
+  const data={empId,month:mKey,net,paid:true,paidDate:todayStr(),bonus:sal?.bonus||0,deduct:sal?.deduct||0,notes:sal?.notes||''};
   if(sal){await dbUpd('salaries',SALARIES,v=>SALARIES=v,sal.id,data);}else{await dbAdd('salaries',SALARIES,v=>SALARIES=v,data);}
   toast('✅ تم تأكيد صرف الراتب','ok');renderSalary();if(document.getElementById('dash-notifs-list'))renderDashNotifs();
+}
+function openSalaryAdj(empId,mKey,base,ded,paid){
+  const e=EMPS.find(x=>x.id===empId);if(!e)return;
+  const sal=SALARIES.find(s=>s.empId===empId&&s.month===mKey);
+  const bonus=sal?.bonus||0; const deduct=sal?.deduct||0; const notes=sal?.notes||'';
+  const baseNet=base-ded;
+  document.getElementById('salary-adj-modal')?.remove();
+  const html=`<div class="mbg" id="salary-adj-modal" style="display:flex;align-items:center;justify-content:center;padding:16px;z-index:600">
+    <div class="mb" style="max-width:420px;width:100%;padding:0;border-radius:16px;overflow:hidden">
+      <div class="fhd" style="padding:14px 20px;border-radius:0"><h2>✏️ علاوة / خصم — ${e.name}</h2></div>
+      <div style="padding:18px 20px;display:flex;flex-direction:column;gap:12px">
+        <div class="fl"><label>علاوة إضافية (ريال)</label><input id="adj-bonus" type="number" min="0" value="${bonus}" placeholder="0" oninput="adjPreview(${baseNet})"></div>
+        <div class="fl"><label>خصم إضافي (ريال)</label><input id="adj-deduct" type="number" min="0" value="${deduct}" placeholder="0" oninput="adjPreview(${baseNet})"></div>
+        <div class="fl"><label>ملاحظة</label><input id="adj-notes" type="text" value="${notes}" placeholder="سبب العلاوة أو الخصم..."></div>
+        <div style="background:var(--g1);border-radius:8px;padding:10px 14px;font-size:.85rem">
+          قبل التعديل: <b>${baseNet.toLocaleString()} ر</b> &nbsp;|&nbsp; بعد التعديل: <b id="adj-preview" style="color:var(--pr)">${(baseNet+bonus-deduct).toLocaleString()} ر</b>
+        </div>
+      </div>
+      <div class="fa">
+        <button class="btn btn-p" onclick="saveSalaryAdj('${empId}','${mKey}',${baseNet},${paid})">💾 حفظ</button>
+        <button class="btn btn-g" onclick="document.getElementById('salary-adj-modal').remove()">إلغاء</button>
+      </div>
+    </div>
+  </div>`;
+  const tmp=document.createElement('div');tmp.innerHTML=html;document.body.appendChild(tmp.firstChild);
+}
+function adjPreview(baseNet){
+  const b=parseFloat(document.getElementById('adj-bonus')?.value)||0;
+  const d=parseFloat(document.getElementById('adj-deduct')?.value)||0;
+  const el=document.getElementById('adj-preview');
+  if(el)el.textContent=(baseNet+b-d).toLocaleString()+' ر';
+}
+async function saveSalaryAdj(empId,mKey,baseNet,paid){
+  const bonus=parseFloat(document.getElementById('adj-bonus')?.value)||0;
+  const deduct=parseFloat(document.getElementById('adj-deduct')?.value)||0;
+  const notes=document.getElementById('adj-notes')?.value.trim()||'';
+  const net=baseNet+bonus-deduct;
+  const sal=SALARIES.find(s=>s.empId===empId&&s.month===mKey);
+  const data={empId,month:mKey,net,paid:!!paid,bonus,deduct,notes,paidDate:sal?.paidDate||''};
+  if(sal){await dbUpd('salaries',SALARIES,v=>SALARIES=v,sal.id,data);}
+  else{await dbAdd('salaries',SALARIES,v=>SALARIES=v,data);}
+  toast('✅ تم حفظ التعديل','ok');
+  document.getElementById('salary-adj-modal')?.remove();
+  renderSalary();
 }
 
 // ══ STUDENTS ══
